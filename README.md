@@ -1,5 +1,7 @@
 # AI Video Studio
 
+**English** · [O'zbekcha](README.uz.md)
+
 **Sun'iy intellekt bilan o'zbek tilida video: ssenariydan tayyor MP4 gacha, hammasi kod orqali.**
 *Uzbek-language video made with AI, from script to finished MP4, all in code.*
 
