@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #072940; --orange: #C96D22; --cream: #F2ECE2; }
+  html, body { margin: 0; }
+  .canvas { width: 1080px; height: 1080px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .avatar { background: var(--navy); }
+  .full { background: var(--cream); }
+  .full .mark { width: 640px; height: 640px; margin-top: -40px; }
+  .avatar .mark { width: 1000px; height: 1000px; }
+  .word { font: 700 128px "Plus Jakarta Sans", sans-serif; letter-spacing: -2px; color: var(--navy); margin-top: -70px; }
+  .word span { color: var(--orange); }
+</style>
+</head>
+<body>
+<!-- ?v=avatar : navy circle-safe avatar, cream a + orange b; ?v=full : cream background with wordmark -->
+<div id="c" class="canvas"></div>
+<script>
+const v = new URLSearchParams(location.search).get('v') || 'avatar';
+const a = v === 'avatar' ? '#F2ECE2' : '#072940';
+const mark = `<svg class="mark" viewBox="0 0 1000 1000"><g transform="translate(-2 9)">
+  <g fill="none" stroke-width="64"><circle cx="330" cy="600" r="140" stroke="${a}"/><circle cx="674" cy="600" r="140" stroke="#C96D22"/></g>
+  <rect x="438" y="428" width="64" height="344" fill="${a}"/><rect x="502" y="210" width="64" height="562" fill="#C96D22"/></g></svg>`;
+const c = document.getElementById('c');
+c.classList.add(v);
+c.innerHTML = mark + (v === 'full' ? '<div class="word">ab<span style="margin:0 -0.07em">.</span>dveloper</div>' : '');
+</script>
+</body>
+</html>

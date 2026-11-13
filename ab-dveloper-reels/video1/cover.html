@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; }
+  /* Reel cover 1080x1920. Title sits inside the 1080x1440 band the profile grid shows (y 240-1680). */
+  #c { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #072940; font-family: "Plus Jakarta Sans", sans-serif; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(70px); }
+  #frame { position: absolute; left: 50%; top: 600px; width: 1080px; height: 1920px; transform: translateX(-50%) scale(.72); transform-origin: 50% 0;
+           -webkit-mask-image: radial-gradient(ellipse 48% 46% at 50% 52%, #000 72%, transparent 100%); }
+  #t { position: absolute; left: 0; right: 0; top: 260px; text-align: center; }
+  .k { display: inline-block; font: 800 30px "Plus Jakarta Sans"; letter-spacing: 6px; color: #072940; background: #C96D22; padding: 12px 26px; border-radius: 30px; }
+  h1 { margin: 26px 0 0; font: 800 128px/1.0 "Plus Jakarta Sans"; letter-spacing: -4px; color: #F2ECE2; text-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  h1 em { font-style: normal; color: #E08A3E; }
+  #mark { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); font: 800 40px "Plus Jakarta Sans"; color: rgba(242,236,226,.85); letter-spacing: -1px; }
+  #mark i { color: #C96D22; font-style: normal; }
+  .ep { display: block; font: 800 34px "Plus Jakarta Sans"; letter-spacing: 10px; color: #F2ECE2; margin-bottom: 22px; opacity: .9; }
+  .ep b { color: #E08A3E; }
+</style>
+</head>
+<body>
+<div id="c">
+  <div class="blob" style="left:-260px;top:-220px;width:900px;height:900px;background:radial-gradient(circle,rgba(201,109,34,.55),rgba(201,109,34,0) 70%)"></div>
+  <div class="blob" style="left:380px;top:1150px;width:1100px;height:1100px;background:radial-gradient(circle,rgba(40,120,170,.45),rgba(40,120,170,0) 70%)"></div>
+  <img id="frame" src="cover_frame.png">
+  <div id="t"><span class="ep">LIBOS · <b>1-QISM</b></span><span class="k">TELEGRAM MINI APP</span><h1>Do'kon<br><em>Telegram ichida</em></h1></div>
+  <div id="mark">ab<i>.</i>dveloper</div>
+</div>
+</body>
+</html>

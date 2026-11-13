@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>LIBOS reel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #072940; --navy2: #0e3d61; --orange: #C96D22; --orange2: #E08A3E; --cream: #F2ECE2; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--navy); font-family: Inter, sans-serif; color: #111; }
+  .abs { position: absolute; }
+  /* background */
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); }
+  #b1 { width: 900px; height: 900px; background: radial-gradient(circle, rgba(201,109,34,.55), rgba(201,109,34,0) 70%); }
+  #b2 { width: 1100px; height: 1100px; background: radial-gradient(circle, rgba(40,120,170,.45), rgba(40,120,170,0) 70%); }
+  #b3 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(242,236,226,.18), rgba(242,236,226,0) 70%); }
+  #dots { position: absolute; inset: -40px; background-image: radial-gradient(rgba(242,236,226,.10) 2px, transparent 2.5px); background-size: 46px 46px; }
+  #dim { position: absolute; inset: 0; background: #02101b; pointer-events: none; }
+  /* captions */
+  #caption { position: absolute; left: 60px; right: 60px; top: 112px; height: 170px; display: flex; align-items: center; justify-content: center; text-align: center; z-index: 30; }
+  .chunk { position: absolute; left: 0; right: 0; font: 800 64px/1.12 "Plus Jakarta Sans", sans-serif; letter-spacing: -1px; color: #fff; text-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .chunk span { display: inline-block; margin: 0 9px; transition: none; }
+  /* phones */
+  .phone { position: absolute; left: 0; top: 0; width: 720px; height: 1480px; border-radius: 100px; background: linear-gradient(145deg, #1d2530, #07090c); box-shadow: 0 70px 140px rgba(0,0,0,.5), inset 0 0 0 4px #2b3644, inset 0 0 0 10px #0a0d11; transform-origin: 0 0; z-index: 10; }
+  .screen { position: absolute; left: 22px; top: 22px; width: 676px; height: 1436px; border-radius: 80px; overflow: hidden; background: #fff; }
+  .island { position: absolute; left: 50%; top: 40px; width: 200px; height: 58px; margin-left: -100px; border-radius: 30px; background: #000; z-index: 60; }
+  .layer { position: absolute; left: 0; top: 0; width: 676px; height: 1436px; overflow: hidden; }
+  .status { position: absolute; left: 0; top: 0; width: 100%; height: 78px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 58px 10px; font: 700 26px Inter; z-index: 55; }
+  .status i { font-style: normal; letter-spacing: 2px; font-size: 22px; }
+  /* instagram-like feed */
+  #ig { background: #fff; }
+  .ighead { position: absolute; top: 88px; left: 0; right: 0; height: 80px; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; font: 800 38px "Plus Jakarta Sans"; }
+  .ico { width: 44px; height: 44px; }
+  .badge { position: absolute; min-width: 40px; height: 40px; border-radius: 20px; background: #ff3b30; color: #fff; font: 800 22px Inter; display: flex; align-items: center; justify-content: center; padding: 0 9px; border: 3px solid #fff; }
+  .post-top { position: absolute; top: 180px; left: 0; right: 0; height: 90px; display: flex; align-items: center; gap: 16px; padding: 0 28px; }
+  .av { border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font: 800 26px Inter; flex: none; }
+  .post-img { position: absolute; top: 270px; left: 0; width: 676px; height: 720px; background: linear-gradient(160deg, #f6efe4, #e9dccb); display: flex; align-items: center; justify-content: center; }
+  .post-img svg { width: 470px; height: 560px; filter: drop-shadow(0 30px 30px rgba(80,50,20,.18)); }
+  .tag { position: absolute; left: 40px; bottom: 40px; background: rgba(0,0,0,.72); color: #fff; font: 700 26px Inter; padding: 12px 20px; border-radius: 14px; }
+  .post-actions { position: absolute; top: 1010px; left: 28px; display: flex; gap: 30px; }
+  .post-text { position: absolute; top: 1090px; left: 28px; right: 28px; font: 500 27px/1.45 Inter; }
+  #notifs .nf { position: absolute; left: 18px; top: 0; width: 640px; height: 112px; border-radius: 34px; background: rgba(246,246,248,.97); box-shadow: 0 16px 40px rgba(0,0,0,.18); display: flex; align-items: center; gap: 18px; padding: 0 24px; }
+  .nf .app { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, #f6a04d, #e8506a 60%, #9a4fd0); display: flex; align-items: center; justify-content: center; color: #fff; font: 800 30px Inter; flex: none; }
+  .nf b { display: block; font: 700 25px Inter; } .nf span { font: 500 25px Inter; color: #333; }
+  .nf em { position: absolute; right: 26px; top: 20px; font: 500 20px Inter; color: #888; font-style: normal; }
+  /* chats (customer DMs) */
+  .chat { background: #fff; }
+  .chead { position: absolute; top: 80px; left: 0; right: 0; height: 104px; border-bottom: 2px solid #eee; display: flex; align-items: center; gap: 18px; padding: 0 28px; font: 700 30px Inter; }
+  .chead small { display: block; font: 500 22px Inter; color: #2bb24c; }
+  .bub { position: absolute; max-width: 470px; padding: 22px 28px; border-radius: 34px; font: 500 30px/1.35 Inter; }
+  .bub.in { left: 28px; background: #efeff2; border-bottom-left-radius: 10px; }
+  .bub.out { right: 28px; background: linear-gradient(135deg, #7b5cff, #b04fd9); color: #fff; border-bottom-right-radius: 10px; }
+  .seen { position: absolute; right: 34px; font: 500 22px Inter; color: #8a8a8f; }
+  .typing { position: absolute; left: 28px; width: 110px; height: 64px; border-radius: 32px; background: #efeff2; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .typing i { width: 13px; height: 13px; border-radius: 50%; background: #999; }
+  .kb { position: absolute; left: 0; right: 0; bottom: 0; height: 450px; background: #d4d6dc; padding: 96px 10px 0; }
+  .kb .krow { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
+  .kb .k { width: 56px; height: 76px; border-radius: 10px; background: #fff; box-shadow: 0 2px 0 #9a9ca3; font: 500 30px Inter; display: flex; align-items: center; justify-content: center; color: #222; }
+  .kb .k.on { background: #b8bbc4; }
+  .inp { position: absolute; left: 16px; right: 16px; top: 18px; height: 62px; border-radius: 31px; background: #fff; font: 500 28px Inter; display: flex; align-items: center; padding: 0 24px; color: #111; white-space: nowrap; overflow: hidden; }
+  .inp .caret { width: 3px; height: 34px; background: #6c4cff; margin-left: 3px; }
+  /* telegram-like chat */
+  #tg { background: linear-gradient(170deg, #d9e4c9, #b9cfa6); }
+  .tgpat { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.35) 3px, transparent 3.5px), radial-gradient(rgba(60,90,40,.10) 2px, transparent 2.5px); background-size: 60px 60px, 38px 38px; background-position: 0 0, 19px 19px; }
+  .tghead { position: absolute; top: 0; left: 0; right: 0; height: 190px; background: #fff; display: flex; align-items: flex-end; padding: 0 26px 22px; gap: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.06); z-index: 5; }
+  .tghead .back { font: 400 54px Inter; color: #2f8de4; width: 40px; line-height: 1; margin-bottom: 8px; }
+  .tghead b { display: block; font: 700 31px Inter; } .tghead small { font: 500 23px Inter; color: #8a96a3; }
+  .tgb { position: absolute; left: 22px; width: 560px; background: #fff; border-radius: 30px; border-bottom-left-radius: 8px; padding: 26px 28px 20px; font: 500 30px/1.4 Inter; box-shadow: 0 2px 2px rgba(0,0,0,.08); }
+  .tgb .time { display: block; text-align: right; font: 500 20px Inter; color: #9aa4ad; margin-top: 4px; }
+  .ibtn { position: absolute; left: 22px; width: 560px; height: 84px; border-radius: 22px; background: rgba(60,90,50,.32); color: #fff; font: 700 30px Inter; display: flex; align-items: center; justify-content: center; gap: 12px; backdrop-filter: blur(6px); }
+  .tginput { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: #fff; display: flex; align-items: center; padding: 0 26px 18px; gap: 18px; font: 500 30px Inter; color: #9aa4ad; }
+  .menu { height: 64px; padding: 0 26px; border-radius: 32px; background: #2f8de4; color: #fff; font: 700 26px Inter; display: flex; align-items: center; gap: 10px; }
+  /* mini app */
+  #mini { background: #fff; }
+  .mhead { position: absolute; top: 0; left: 0; right: 0; height: 170px; background: #fff; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 24px; font: 600 28px Inter; color: #2f8de4; z-index: 5; border-bottom: 1px solid #f0f0f0; }
+  .mhead b { color: #111; font: 800 32px "Plus Jakarta Sans"; letter-spacing: 3px; }
+  .mhead b i { color: var(--orange); font-style: normal; }
+  #mscroll { position: absolute; left: 0; top: 170px; width: 676px; }
+  .hero { position: absolute; left: 28px; top: 20px; width: 620px; height: 150px; border-radius: 30px; background: linear-gradient(120deg, var(--navy), #11507d); overflow: hidden; color: #fff; padding: 26px 30px; }
+  .hero b { display: block; font: 800 36px "Plus Jakarta Sans"; } .hero span { font: 500 24px Inter; opacity: .85; }
+  .hero .pill { position: absolute; right: 24px; top: 24px; background: var(--orange); font: 800 22px Inter; padding: 8px 18px; border-radius: 20px; }
+  .search { position: absolute; left: 28px; top: 190px; width: 620px; height: 78px; border-radius: 39px; background: #f2f2f5; font: 500 28px Inter; color: #9a9aa2; display: flex; align-items: center; padding: 0 30px; gap: 14px; }
+  .chips { position: absolute; left: 28px; top: 290px; height: 62px; width: 900px; }
+  .chipx { position: absolute; top: 0; height: 62px; border-radius: 31px; background: #f2f2f5; font: 600 26px Inter; display: flex; align-items: center; justify-content: center; color: #333; }
+  .chipx.act { color: #fff; background: transparent; }
+  .chipx { z-index: 1; }
+  #chipInd { position: absolute; top: 0; height: 62px; border-radius: 31px; background: #111; }
+  .grid { position: absolute; left: 0; top: 380px; width: 676px; }
+  .card { position: absolute; width: 300px; height: 440px; }
+  .card .img { position: absolute; left: 0; top: 0; width: 300px; height: 330px; border-radius: 28px; display: flex; align-items: center; justify-content: center; }
+  .card .img svg { width: 220px; height: 264px; filter: drop-shadow(0 16px 14px rgba(0,0,0,.12)); }
+  .card .nm { position: absolute; left: 6px; top: 346px; font: 600 26px Inter; color: #333; }
+  .card .pr { position: absolute; left: 6px; top: 386px; font: 800 28px Inter; color: #111; }
+  .card .hrt { position: absolute; right: 16px; top: 16px; width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,.85); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  /* product */
+  #prod { background: #fff; }
+  .pimg { position: absolute; left: 0; top: 0; width: 676px; height: 800px; background: linear-gradient(170deg, #f6f1e8, #ebe2d4); display: flex; align-items: center; justify-content: center; }
+  #pdress { width: 430px; height: 516px; margin-top: 60px; filter: drop-shadow(0 34px 30px rgba(60,40,20,.2)); }
+  .rbtn { position: absolute; top: 108px; width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,.9); display: flex; align-items: center; justify-content: center; font: 600 34px Inter; }
+  .ptitle { position: absolute; left: 32px; top: 830px; font: 800 46px "Plus Jakarta Sans"; }
+  .pprice { position: absolute; left: 32px; top: 896px; font: 800 42px Inter; color: var(--orange); }
+  .prate { position: absolute; right: 32px; top: 906px; font: 600 26px Inter; color: #666; }
+  .plab { position: absolute; left: 32px; font: 700 26px Inter; color: #888; text-transform: uppercase; letter-spacing: 2px; }
+  .sw { position: absolute; width: 68px; height: 68px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0,0,0,.08); }
+  #swRing { position: absolute; width: 88px; height: 88px; border-radius: 50%; border: 4px solid #111; }
+  .sz { position: absolute; top: 1190px; width: 130px; height: 80px; border-radius: 22px; border: 3px solid #e3e3e8; font: 700 30px Inter; display: flex; align-items: center; justify-content: center; background: #fff; }
+  .sz.off { color: #c4c4ca; background: #f6f6f8; }
+  .sz.off::after { content: ""; position: absolute; left: 14px; right: 14px; top: 38px; height: 3px; background: #c4c4ca; transform: rotate(-20deg); }
+  .sz.sel { border-color: #111; background: #111; color: #fff; }
+  .pbar { position: absolute; left: 0; right: 0; top: 1306px; height: 130px; background: #fff; border-top: 1px solid #f0f0f0; }
+  .cartb { position: absolute; left: 28px; top: 18px; width: 100px; height: 90px; border-radius: 26px; background: #f2f2f5; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+  .addb { position: absolute; left: 148px; top: 18px; width: 500px; height: 90px; border-radius: 26px; background: var(--orange); color: #fff; font: 800 32px Inter; display: flex; align-items: center; justify-content: center; }
+  #toast { position: absolute; left: 50%; top: 970px; transform: translateX(-50%); background: #111; color: #fff; font: 600 26px Inter; padding: 18px 30px; border-radius: 26px; white-space: nowrap; }
+  /* checkout sheet */
+  #sheetBg { position: absolute; inset: 0; background: rgba(0,0,0,.35); }
+  #sheet { position: absolute; left: 0; top: 0; width: 676px; height: 1150px; background: #fff; border-radius: 44px 44px 0 0; padding: 0 32px; }
+  #sheet .grab { position: absolute; left: 50%; top: 16px; width: 80px; height: 8px; margin-left: -40px; border-radius: 4px; background: #ddd; }
+  #sheet h3 { margin: 0; position: absolute; left: 32px; top: 44px; font: 800 40px "Plus Jakarta Sans"; }
+  .row { position: absolute; left: 32px; right: 32px; display: flex; align-items: center; gap: 20px; font: 600 27px Inter; color: #222; }
+  .row small { display: block; font: 500 23px Inter; color: #888; }
+  .thumb { width: 100px; height: 110px; border-radius: 20px; background: #f1ebe1; display: flex; align-items: center; justify-content: center; flex: none; }
+  .thumb svg { width: 80px; height: 96px; }
+  .map { position: absolute; left: 32px; top: 270px; width: 612px; height: 250px; border-radius: 28px; overflow: hidden; background: #eef0ea; }
+  #pin { position: absolute; left: 286px; top: 70px; width: 40px; height: 56px; }
+  .pay { position: absolute; left: 32px; top: 1000px; width: 612px; height: 100px; border-radius: 30px; background: #111; color: #fff; font: 800 32px Inter; display: flex; align-items: center; justify-content: center; }
+  .spin { width: 46px; height: 46px; border-radius: 50%; border: 6px solid rgba(255,255,255,.3); border-top-color: #fff; }
+  #ok { position: absolute; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #okc { width: 220px; height: 220px; border-radius: 50%; background: #22c55e; display: flex; align-items: center; justify-content: center; box-shadow: 0 24px 60px rgba(34,197,94,.4); }
+  #ok h2 { font: 800 44px "Plus Jakarta Sans"; margin: 50px 0 10px; } #ok p { font: 500 28px Inter; color: #777; margin: 0; }
+  .conf { position: absolute; width: 16px; height: 26px; border-radius: 4px; }
+  /* admin chat */
+  #adm { background: linear-gradient(170deg, #cfdbe6, #b3c6d6); }
+  .card2 { position: absolute; left: 22px; top: 230px; width: 590px; background: #fff; border-radius: 30px; border-bottom-left-radius: 8px; overflow: hidden; box-shadow: 0 2px 2px rgba(0,0,0,.08); }
+  .card2 .top { height: 300px; background: linear-gradient(170deg, #f1ece2, #e4d9c7); display: flex; align-items: center; justify-content: center; }
+  .card2 .top svg { width: 210px; height: 252px; }
+  .card2 h4 { margin: 0; padding: 26px 30px 6px; font: 800 32px Inter; }
+  .orow { margin: 6px 16px; padding: 12px 16px; border-radius: 16px; font: 500 28px Inter; color: #222; }
+  .obtns { display: flex; gap: 10px; padding: 14px 16px 18px; }
+  .obtns div { flex: 1; height: 76px; border-radius: 20px; background: #eef3f8; color: #2f8de4; font: 700 26px Inter; display: flex; align-items: center; justify-content: center; }
+  #aban { position: absolute; left: 18px; top: 18px; width: 640px; height: 112px; border-radius: 34px; background: rgba(246,246,248,.98); box-shadow: 0 16px 40px rgba(0,0,0,.2); display: flex; align-items: center; gap: 18px; padding: 0 24px; z-index: 70; }
+  /* floating */
+  .wid { position: absolute; background: #fff; border-radius: 34px; box-shadow: 0 30px 70px rgba(0,0,0,.35); padding: 28px 32px; z-index: 20; }
+  .wid small { display: block; font: 600 24px Inter; color: #888; }
+  .wid b { display: block; font: 800 42px "Plus Jakarta Sans"; color: #111; margin-top: 6px; white-space: nowrap; }
+  .bars { display: flex; gap: 12px; align-items: flex-end; height: 110px; margin-top: 18px; }
+  .bars i { width: 34px; border-radius: 10px; background: #e7dfd3; }
+  #finger { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 40; }
+  #fdot { position: absolute; left: -38px; top: -38px; width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,.55); border: 4px solid rgba(255,255,255,.9); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  #fring { position: absolute; left: -38px; top: -38px; width: 76px; height: 76px; border-radius: 50%; border: 5px solid rgba(255,255,255,.9); }
+  #wipe { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+  .band { position: absolute; left: -600px; width: 2400px; height: 1300px; transform-origin: 50% 50%; }
+  #logo { position: absolute; left: 0; right: 0; top: 520px; display: flex; flex-direction: column; align-items: center; z-index: 25; }
+  #logo svg { width: 560px; height: 560px; }
+  #wordmark { font: 800 96px "Plus Jakarta Sans"; letter-spacing: -2px; color: var(--cream); margin-top: -40px; }
+  #wordmark i { color: var(--orange); font-style: normal; margin: 0 -.07em; }
+  #rew { position: absolute; left: 70px; top: 330px; font: 800 70px Inter; color: #fff; z-index: 45; letter-spacing: -8px; }
+  #scan { position: absolute; inset: 0; z-index: 44; background: repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 2px, transparent 2px 6px); mix-blend-mode: overlay; }
+  #grain { position: absolute; inset: -100px; z-index: 90; opacity: .07; pointer-events: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  #vig { position: absolute; inset: 0; z-index: 89; pointer-events: none; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.45) 100%); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"><div id="dots"></div><div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div></div>
+  <div id="dim"></div>
+  <div id="caption"></div>
+
+  <!-- floating props outside the phone -->
+  <svg id="clock" class="abs" width="170" height="170" viewBox="0 0 100 100" style="z-index:20">
+    <circle cx="50" cy="50" r="44" fill="#F2ECE2" stroke="#C96D22" stroke-width="6"/>
+    <g stroke="#072940" stroke-linecap="round"><line id="hh" x1="50" y1="50" x2="50" y2="30" stroke-width="6"/><line id="mh" x1="50" y1="50" x2="50" y2="16" stroke-width="4"/></g>
+    <circle cx="50" cy="50" r="5" fill="#C96D22"/>
+  </svg>
+  <div id="store" class="abs" style="z-index:20;width:220px;text-align:center">
+    <svg width="230" height="200" viewBox="0 0 230 200">
+      <rect x="25" y="70" width="180" height="120" rx="10" fill="#F2ECE2"/>
+      <path d="M15 70 L35 20 L195 20 L215 70 Z" fill="#fff"/>
+      <g fill="#e05a4f"><path d="M35 20 L55 20 L47 70 L15 70 Z"/><path d="M87 20 L107 20 L103 70 L79 70 Z"/><path d="M139 20 L159 20 L163 70 L139 70 Z"/><path d="M175 20 L195 20 L215 70 L187 70 Z"/></g>
+      <rect x="95" y="115" width="44" height="75" rx="6" fill="#072940"/><rect x="40" y="100" width="40" height="40" rx="6" fill="#8fb6cf"/><rect x="150" y="100" width="40" height="40" rx="6" fill="#8fb6cf"/>
+    </svg>
+    <div style="font:700 26px Inter;color:#F2ECE2;margin-top:6px;white-space:nowrap">boshqa do'kon</div>
+  </div>
+  <div id="flyer" class="abs av" style="width:120px;height:120px;background:#e8506a;font-size:52px;z-index:21;border:6px solid #fff">A<span style="position:absolute;right:-18px;bottom:-14px;font-size:54px">🛍</span></div>
+
+  <div id="phoneA" class="phone"><div class="screen" id="scrA">
+    <div class="status" id="stA"><span>12:30</span><i>●●● ▮</i></div>
+
+    <div class="layer" id="ig">
+      <div class="ighead"><span>libos.uz</span><span style="position:relative;display:flex;gap:30px">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M12 21s-7-4.4-9.5-8.6C.7 9.3 2.6 5 6.4 5c2.2 0 3.6 1.4 5.6 3.4C14 6.4 15.4 5 17.6 5c3.8 0 5.7 4.3 3.9 7.4C19 16.6 12 21 12 21z"/></svg>
+        <span style="position:relative"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M22 3L2 10l8 3 3 8z"/><path d="M10 13l6-6"/></svg><span class="badge" id="dmBadge" style="right:-24px;top:-18px">1</span></span>
+      </span></div>
+      <div class="post-top"><div class="av" style="width:66px;height:66px;background:linear-gradient(135deg,#C96D22,#072940)">L</div><div><b style="font:700 27px Inter">libos.uz</b><div style="font:500 22px Inter;color:#888">Toshkent</div></div></div>
+      <div class="post-img"><span id="igDress"></span><div class="tag">189 000 so'm</div></div>
+      <div class="post-actions" id="igAct"></div>
+      <div class="post-text"><b>1 248 ta yoqtirish</b><br><b>libos.uz</b> Yangi kolleksiya keldi ✨ Zig'ir ko'ylak, 4 xil rangda</div>
+      <div id="notifs"></div>
+    </div>
+
+    <div class="layer chat" id="chat0"></div>
+    <div class="layer chat" id="chat1"></div>
+    <div class="layer chat" id="chat2"></div>
+    <div class="layer" id="phDim" style="background:#000"></div>
+
+    <div class="layer" id="tg">
+      <div class="tgpat"></div>
+      <div class="tghead"><div class="back">‹</div><div class="av" style="width:84px;height:84px;background:linear-gradient(135deg,#C96D22,#E08A3E);font-size:34px">L</div><div><b>LIBOS</b><small>bot</small></div></div>
+      <div class="tgb" id="tgb" style="top:240px">Assalomu alaykum! 👋<br>LIBOS do'koniga xush kelibsiz.<br>Yangi kolleksiya shu yerda — bemalol tanlang.<span class="time">12:31</span></div>
+      <div class="ibtn" id="ibtn" style="top:500px">🛍&nbsp; Do'konni ochish</div>
+      <div class="tginput"><div class="menu">☰ Do'kon</div>Xabar</div>
+    </div>
+
+    <div class="layer" id="mini">
+      <div class="mhead"><span>✕ Yopish</span><b>LIBOS<i>.</i></b><span>⋯</span></div>
+      <div id="mscroll">
+        <div class="hero"><b>Kuz kolleksiyasi</b><span>Yangi modellar har hafta</span><div class="pill">YANGI</div></div>
+        <div class="search">🔍 Qidirish</div>
+        <div class="chips"><div id="chipInd"></div></div>
+        <div class="grid" id="gridA"></div>
+        <div class="grid" id="gridB"></div>
+      </div>
+    </div>
+
+    <div class="layer" id="prod">
+      <div class="pimg"><span id="pdressWrap"></span></div>
+      <div class="rbtn" style="left:28px">‹</div><div class="rbtn" style="right:28px">♡</div>
+      <div class="ptitle">Zig'ir ko'ylak</div><div class="pprice">189 000 so'm</div><div class="prate">★ 4.9 · 128 sharh</div>
+      <div class="plab" style="top:990px">Rang</div>
+      <div id="swRing"></div>
+      <div class="sw" style="left:36px;top:1040px;background:#E9DFCC"></div>
+      <div class="sw" style="left:126px;top:1040px;background:#24426A"></div>
+      <div class="sw" style="left:216px;top:1040px;background:#6E7C4A"></div>
+      <div class="plab" style="top:1146px;left:330px">Razmer</div>
+      <div class="sz" id="szS" style="left:28px">S</div><div class="sz" id="szM" style="left:172px">M</div><div class="sz off" id="szL" style="left:316px">L</div><div class="sz" id="szXL" style="left:460px">XL</div>
+      <div id="toast">L razmer tugagan 😔 S yoki M bor</div>
+      <div class="pbar"><div class="cartb" id="cartb">🛒<span class="badge" id="cartBadge" style="right:-10px;top:-12px">1</span></div><div class="addb" id="addb">Savatga qo'shish</div></div>
+      <div id="fly2" class="abs" style="left:0;top:0;width:200px;height:240px"></div>
+      <div id="sheetBg"></div>
+      <div id="sheet"><div class="grab"></div><h3>Buyurtma</h3>
+        <div class="row" style="top:120px"><div class="thumb" id="sthumb"></div><div style="flex:1">Zig'ir ko'ylak<small>Zaytun · M</small></div><div style="font:800 28px Inter">189 000</div></div>
+        <div class="map"><svg width="612" height="250" viewBox="0 0 612 250">
+          <rect width="612" height="250" fill="#eef0ea"/><path d="M0 170 Q200 140 330 180 T612 150 L612 250 L0 250 Z" fill="#cfe3ef"/>
+          <rect x="420" y="20" width="150" height="90" rx="16" fill="#d7e8c8"/>
+          <g stroke="#fff" stroke-width="16" fill="none"><path d="M-10 70 L620 95"/><path d="M180 -10 L230 260"/><path d="M380 -10 L340 260"/></g>
+          <g stroke="#fff" stroke-width="7" fill="none"><path d="M-10 130 L620 125"/><path d="M90 -10 L120 260"/><path d="M520 -10 L480 260"/></g></svg>
+          <svg id="pin" viewBox="0 0 40 56"><path d="M20 0 C9 0 0 9 0 20 C0 34 20 56 20 56 C20 56 40 34 40 20 C40 9 31 0 20 0Z" fill="#C96D22"/><circle cx="20" cy="20" r="8" fill="#fff"/></svg>
+        </div>
+        <div class="row" style="top:540px">📍<div>Chilonzor, 9-kvartal<small>Uy 14, xonadon 52</small></div></div>
+        <div class="row" style="top:640px">🚚<div>Ertaga, 10:00–14:00<small>Yetkazib berish bepul</small></div></div>
+        <div class="row" style="top:740px">💳<div>Karta •••• 4521<small>To'lov ilova ichida</small></div></div>
+        <div class="row" style="top:850px;justify-content:space-between;font:800 32px Inter"><span>Jami</span><span>189 000 so'm</span></div>
+        <div class="pay" id="payb"><span id="payTxt">To'lash · 189 000 so'm</span><div class="spin" id="spin"></div></div>
+      </div>
+      <div id="ok"><div id="okc"><svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="okPath" d="M5 12.5l4.5 4.5L19 7.5" stroke-dasharray="22" stroke-dashoffset="22"/></svg></div>
+        <h2>To'lov qabul qilindi</h2><p>Buyurtma #1043 · ertaga yetkaziladi</p><div id="confetti"></div></div>
+    </div>
+  </div><div class="island"></div></div>
+
+  <div id="phoneB" class="phone"><div class="screen" id="scrB">
+    <div class="status"><span>12:32</span><i>●●● ▮</i></div>
+    <div class="layer" id="adm">
+      <div class="tghead"><div class="back">‹</div><div class="av" style="width:84px;height:84px;background:linear-gradient(135deg,#072940,#11507d);font-size:30px">L</div><div><b>LIBOS · Admin</b><small>bot</small></div></div>
+      <div class="card2" id="ocard"><div class="top" id="otop"></div><h4>🛍 Yangi buyurtma #1043</h4>
+        <div class="orow" id="or0">👗 Zig'ir ko'ylak</div>
+        <div class="orow" id="or1">🎨 Zaytun · 📏 M razmer</div>
+        <div class="orow" id="or2">📍 Chilonzor, 9-kvartal, 14-uy</div>
+        <div class="orow" id="or3">🚚 Ertaga, 10:00–14:00</div>
+        <div class="orow" id="or4">💳 189 000 so'm — <b>to'langan ✅</b></div>
+        <div class="obtns"><div>✅ Qabul qilish</div><div>🚚 Kuryerga</div></div></div>
+      <div class="tginput"><div class="menu">☰ Panel</div>Xabar</div>
+    </div>
+    <div id="aban"><div class="nf"><div class="app" style="background:linear-gradient(135deg,#072940,#11507d)">L</div></div><div><b style="font:700 25px Inter">LIBOS · Admin</b><span style="font:500 25px Inter;color:#333">🛍 Yangi buyurtma #1043 · 189 000 so'm</span></div></div>
+  </div><div class="island"></div></div>
+
+  <div class="wid" id="w1" style="left:30px;top:1120px;width:450px"><small>Bugungi savdo</small><b id="w1n">2 268 000</b><div class="bars" id="bars"></div></div>
+  <div class="wid" id="w2" style="left:40px;top:1530px;width:400px;padding:22px 30px"><small>Ombor · zaytun, M</small><b style="font-size:40px"><span id="w2n">5</span> ta qoldi</b></div>
+
+  <div id="finger"><div id="fring"></div><div id="fdot"></div></div>
+  <div id="logo"><svg viewBox="0 0 1000 1000"><g transform="translate(-2 9)">
+      <circle id="ra" cx="330" cy="600" r="140" fill="none" stroke="#F2ECE2" stroke-width="64" stroke-dasharray="880" transform="rotate(-90 330 600)"/>
+      <circle id="rb" cx="674" cy="600" r="140" fill="none" stroke="#C96D22" stroke-width="64" stroke-dasharray="880" transform="rotate(90 674 600)"/>
+      <rect id="sa" x="438" y="428" width="64" height="344" fill="#F2ECE2"/><rect id="sb" x="502" y="210" width="64" height="562" fill="#C96D22"/></g></svg>
+    <div id="wordmark">ab<i>.</i>dveloper</div></div>
+  <div id="wipe"><div class="band" id="bandO" style="background:var(--orange)"></div><div class="band" id="bandC" style="background:var(--cream)"></div></div>
+  <div id="rew">◀◀</div><div id="scan"></div>
+  <div id="vig"></div><div id="grain"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script src="garments.js"></script>
+<script>
+'use strict';
+// ---------- helpers ----------
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const win = (t, a, b, f = .2) => P(t, a, a + f) * (1 - P(t, b - f, b));
+function tf(el, o = {}) {
+  const { x = 0, y = 0, s = 1, r = 0 } = o;
+  el.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${o.sx ?? s},${o.sy ?? s})`;
+  if (o.o !== undefined) el.style.opacity = o.o;
+}
+// display, not visibility: a visible child would still show inside a hidden parent
+const vis = (el, v) => { el.style.display = v ? '' : 'none'; };
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, k) => '#' + hex(a).map((v, i) => Math.round(lerp(v, hex(b)[i], k)).toString(16).padStart(2, '0')).join('');
+
+// ---------- narration words & captions ----------
+const LINES = TL.lines;
+const WORDS = LINES.map(l => {
+  const toks = l.text.split(' ');
+  const w = toks.map(tk => {
+    let k = tk.replace(/[^A-Za-z0-9'ʻ’]/g, '').length + 1.4;
+    if (/[,]$/.test(tk)) k += 2.2;
+    if (/[.!?…]$|\.\.\.$/.test(tk) || tk.endsWith('»')) k += 3;
+    if (tk === '—') k = 2.2;
+    return k;
+  });
+  const sum = w.reduce((a, b) => a + b, 0), dur = l.b - l.a;
+  let acc = 0;
+  return toks.map((tk, i) => { const a = l.a + dur * acc / sum; acc += w[i]; return { tk, a, b: l.a + dur * acc / sum }; });
+});
+function wordTime(li, needle) { const w = WORDS[li].find(w => w.tk.toLowerCase().includes(needle.toLowerCase())); return w ? w.a : LINES[li].a; }
+// chunks: one line of up to ~24 chars; start a new chunk before a word that would overflow, end after punctuation
+const CHUNKS = [];
+WORDS.forEach((ws, li) => {
+  let cur = [];
+  const flush = () => { if (cur.length) CHUNKS.push({ li, words: cur }); cur = []; };
+  ws.forEach(w => {
+    if (w.tk === '—') return;
+    const lim = /[,.!?:»]$/.test(w.tk) ? 36 : 24;   // a short closing word may wrap to a 2nd line rather than stand alone
+    if (cur.length && [...cur, w].map(x => x.tk).join(' ').length > lim) flush();
+    cur.push(w);
+    if (/[,.!?:»]$/.test(w.tk)) flush();
+  });
+  flush();
+});
+CHUNKS.forEach(c => { c.a = c.words[0].a - .06; });
+CHUNKS.forEach((c, i) => {
+  const nx = CHUNKS[i + 1];
+  c.b = nx && nx.li === c.li ? nx.a : LINES[c.li].b + .3;
+  const el = document.createElement('div'); el.className = 'chunk';
+  el.innerHTML = c.words.map(w => `<span>${w.tk}</span>`).join(' ');
+  $('caption').appendChild(el); c.el = el; c.spans = [...el.children];
+});
+function captions(t, hidden) {
+  CHUNKS.forEach(c => {
+    const on = !hidden && t >= c.a && t < c.b;
+    vis(c.el, on);
+    if (!on) return;
+    const k = P(t, c.a, c.a + .12);
+    tf(c.el, { y: (1 - eo(k)) * 26, o: k });
+    c.words.forEach((w, i) => {
+      const sp = c.spans[i], said = t >= w.a, now = t >= w.a && t < w.b;
+      sp.style.color = now ? '#F0A060' : '#fff';
+      sp.style.opacity = said ? 1 : .38;
+      const pk = P(t, w.a, w.a + .14);
+      sp.style.transform = `scale(${said ? lerp(1.12, 1, eo(pk)) : 1})`;
+    });
+  });
+}
+
+// ---------- sound cue sheet (read by the mixer) ----------
+const SFX = [];
+const sfx = (t, id, g = 1, dur = 0, pan = 0) => SFX.push({ t: +t.toFixed(3), id: String(id), g, dur, pan });
+
+// ---------- build static content ----------
+const G = GARMENTS;
+$('igDress').innerHTML = G.dress('#E9DFCC');
+$('igAct').innerHTML = ['♡', '💬', '➤'].map(s => `<span style="font:400 46px Inter">${s}</span>`).join('');
+const NAMES = [['dilnoza_m', '#e8506a'], ['aziza.uz', '#7b5cff'], ['malika_95', '#22a06b'], ['sevara_k', '#f29d38'], ['nilufar.style', '#3d8bfd'], ['kamola_t', '#d94fa2'], ['madina.s', '#00a3a3'], ['zarina_b', '#9b6b3d']];
+const QS = ['Narxi qancha?', 'Razmer bormi?', 'Qizili bormi?', 'Dostavka bormi?', 'M razmer bormi?', 'Narxi?', 'Hali bormi?', "Rasmini tashlang"];
+const NT = [0.85, 1.3, 1.68, 2.0, 2.22, 2.4, 2.53, 2.64, 2.74, 2.82, 2.89, 2.95, 3.01, 3.06, 3.11, 3.16, 3.2, 3.24, 3.28, 3.32];
+NT.forEach((tt, i) => {
+  const [n, c] = NAMES[i % NAMES.length];
+  const d = document.createElement('div'); d.className = 'nf';
+  d.innerHTML = `<div class="app" style="background:${c}">${n[0].toUpperCase()}</div><div><b>${n}</b><span>${QS[i % QS.length]}</span></div><em>hozir</em>`;
+  $('notifs').appendChild(d);
+});
+const NFS = [...$('notifs').children];
+NT.forEach((tt, i) => sfx(tt, i % 2 ? 2357 : 2354, i < 4 ? .55 : .35, .8, (i % 3 - 1) * .3));
+
+const CHATS = [
+  { n: 'aziza.uz', c: '#7b5cff', q: 'Narxi qancha?', r: "Narxi 189 000 so'm 😊" },
+  { n: 'malika_95', c: '#22a06b', q: 'Razmer bormi?', r: 'S va M razmeri bor 😊' },
+  { n: 'sevara_k', c: '#f29d38', q: 'Qizili bormi?', r: 'Qizili ham bor 😊' },
+];
+const KEYS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+CHATS.forEach((ch, i) => {
+  $('chat' + i).innerHTML = `
+    <div class="chead"><div style="font:400 50px Inter;color:#111;width:30px">‹</div><div class="av" style="width:70px;height:70px;background:${ch.c}">${ch.n[0].toUpperCase()}</div><div>${ch.n}<small>faol</small></div></div>
+    <div class="bub in" id="q${i}" style="top:230px">${ch.q}</div>
+    <div class="bub out" id="r${i}" style="top:340px">${ch.r}</div>
+    <div class="seen" id="seen${i}" style="top:440px">Ko'rildi</div>
+    <div class="typing" id="typ${i}" style="top:470px"><i></i><i></i><i></i></div>
+    <div class="kb" id="kb${i}"><div class="inp"><span id="in${i}"></span><span class="caret"></span></div>
+      ${KEYS.map(r => `<div class="krow">${[...r].map(k => `<div class="k">${k}</div>`).join('')}</div>`).join('')}
+      <div class="krow"><div class="k" style="width:420px">bo'shliq</div></div></div>`;
+});
+const CH0 = 3.62, CHD = 1.62;
+CHATS.forEach((ch, i) => {
+  const s = CH0 + i * CHD;
+  sfx(s + .12, 2356, .55, .8);
+  sfx(s + .3, 1393, .45, .95);
+  sfx(s + 1.25, 166, .45, .6);
+  if (i < 2) sfx(s + 1.48, 3115, .35, .6);
+});
+sfx(3.7, 1063, .3, 2); sfx(5.7, 1063, .3, 2); sfx(7.7, 1063, .3, 1.2);
+
+const PRODUCTS_A = [
+  ['dress', "Zig'ir ko'ylak", '189 000', '#E9DFCC', '#f4ede2'], ['tshirt', 'Oversize futbolka', '99 000', '#f5f5f2', '#e9eef3'],
+  ['jacket', 'Denim kurtka', '349 000', '#4f78a8', '#e7eef6'], ['hoodie', 'Xudi', '229 000', '#6E7C4A', '#eef0e5'],
+  ['pants', 'Klassik shim', '179 000', '#24426A', '#e9edf3'], ['skirt', 'Plisse yubka', '159 000', '#d98f8f', '#f8ecec'],
+  ['trench', 'Trench plash', '459 000', '#c9a77c', '#f4ede2'], ['polo', 'Polo', '119 000', '#2f8f6a', '#e6f2ec'],
+];
+const PRODUCTS_B = [
+  ['dress', "Zig'ir ko'ylak", '189 000', '#E9DFCC', '#f4ede2'], ['dress', 'Shoyi ko\'ylak', '269 000', '#b85c6e', '#f7eaee'],
+  ['dress', 'Midi ko\'ylak', '219 000', '#24426A', '#e9edf3'], ['dress', 'Yozgi ko\'ylak', '149 000', '#e8c15a', '#faf3df'],
+];
+function fillGrid(id, list) {
+  $(id).innerHTML = list.map((p, i) => `<div class="card" style="left:${i % 2 ? 348 : 28}px;top:${Math.floor(i / 2) * 470}px">
+    <div class="img" style="background:${p[4]}">${G[p[0]](p[3])}<div class="hrt">♡</div></div><div class="nm">${p[1]}</div><div class="pr">${p[2]} so'm</div></div>`).join('');
+}
+fillGrid('gridA', PRODUCTS_A); fillGrid('gridB', PRODUCTS_B);
+const CHIPS = [['Hammasi', 0, 150], ["Ko'ylaklar", 164, 180], ['Kurtkalar', 358, 166], ['Futbolkalar', 538, 190]];
+$('chipInd').insertAdjacentHTML('afterend', CHIPS.map(([n, x, w], i) => `<div class="chipx" id="chip${i}" style="left:${x}px;width:${w}px">${n}</div>`).join(''));
+$('sthumb').innerHTML = G.dress('#6E7C4A');
+$('otop').innerHTML = G.dress('#6E7C4A');
+$('bars').innerHTML = [40, 62, 50, 78, 66, 90, 30].map(h => `<i style="height:${h}px"></i>`).join('');
+const CONF = [...Array(46)].map((_, i) => {
+  const d = document.createElement('div'); d.className = 'conf';
+  d.style.background = ['#C96D22', '#22c55e', '#3d8bfd', '#e8506a', '#f2c94c', '#072940'][i % 6];
+  $('confetti').appendChild(d);
+  const a = (i / 46) * Math.PI * 2 + (i % 5) * .2;
+  return { el: d, vx: Math.cos(a) * (240 + (i * 37) % 260), vy: Math.sin(a) * (240 + (i * 53) % 220) - 380, r: (i * 47) % 360 };
+});
+
+// ---------- layout constants ----------
+const PH = { x: 223, y: 300, s: .88 };      // phone A/B resting place on the stage
+const S2 = (x, y) => [PH.x + (22 + x) * PH.s, PH.y + (22 + y) * PH.s];
+
+// ---------- timeline anchors (from the narration) ----------
+const T = {
+  portlab: wordTime(0, 'portlab'),
+  lost: LINES[2].a, turn: LINES[3].a, tg: LINES[4].a, cat: LINES[5].a, prod: LINES[6].a,
+  tugagan: wordTime(6, 'tugagan'), cart: LINES[7].a, manzil: wordTime(7, 'manzil'), tolov: wordTime(7, "to'lov"), tayyor: wordTime(7, 'tayyor'),
+  seller: LINES[8].a, nima: wordTime(8, 'nima'), razmer: wordTime(8, 'razmer'), qayer: wordTime(8, 'qayerga'), pul: wordTime(8, 'Pul'),
+  outro: LINES[9].a,
+};
+const REW = [T.turn - .95, T.turn - .12];   // rewind window
+const WIPE = [T.turn - .2, T.turn + .55];
+const TG0 = T.turn + .2;                     // telegram screen under the wipe
+const TAP = {
+  open: T.tg + 1.25, chip: T.cat + 2.85, card: T.cat + 3.9,
+  c1: T.prod + 1.1, c2: T.prod + 2.35, szL: T.tugagan - .1, szM: T.tugagan + 1.9,
+  add: T.cart + .05, cartI: T.cart + .62, pay: T.tolov + .25,
+};
+const SHEET = TAP.open + .3, PRODIN = TAP.card + .15, ADD = TAP.add, CHECK = TAP.cartI + .1, PIN = T.manzil + .25, OK = TAP.pay + .35;
+const SWAP = T.seller - .05;
+const OUT = T.outro;
+
+// cues for the second half
+sfx(T.portlab, 3005, .8, 1); sfx(T.portlab + .02, 2364, .55, .6);
+sfx(T.lost + .9, 110, .55, 2); sfx(T.lost + 1.35, 2575, .5, .8);
+sfx(REW[0] - .05, 1093, .8, 1.0); sfx(WIPE[0], 1492, .8, 1.2);
+sfx(T.tg + .1, 2356, .6, .8); sfx(TAP.open, 1109, .7, .5); sfx(SHEET - .05, 1490, .6, 1); sfx(SHEET + .4, 2633, .35, 1.6);
+sfx(T.cat + .2, 166, .3, .6); sfx(T.cat + 2.1, 166, .3, .6); sfx(TAP.chip, 2585, .6, .5); sfx(TAP.card, 1109, .7, .5); sfx(PRODIN, 3120, .45, .9);
+sfx(TAP.c1, 2364, .6, .5); sfx(TAP.c2, 2364, .6, .5); sfx(TAP.szL, 2575, .55, .6); sfx(TAP.szM, 2568, .6, .5);
+sfx(TAP.add, 1109, .6, .4); sfx(ADD + .05, 3005, .5, .8); sfx(ADD + .55, 2925, .6, .6); sfx(TAP.cartI, 1109, .5, .4); sfx(CHECK, 166, .5, .6);
+sfx(PIN + .22, 2364, .5, .5); sfx(TAP.pay, 1109, .6, .4); sfx(OK + .02, 2865, .8, 1.2); sfx(OK + .12, 871, .5, 1.2);
+sfx(SWAP, 1492, .45, 1.2); sfx(SWAP + .6, 951, .45, 1.4); sfx(SWAP + 1.1, 2356, .6, .8);
+sfx(T.nima, 2585, .3, .4); sfx(T.razmer, 2585, .3, .4); sfx(T.qayer, 2585, .3, .4);
+sfx(T.pul, 1992, .42, 1.5); sfx(T.pul + .25, 1993, .3, 1);
+sfx(OUT - .05, 2608, .6, 1.2); sfx(OUT + .55, 3120, .6, 1.2); sfx(OUT + 1.6, 871, .5, 1.5);
+
+// ---------- scene renderers ----------
+function bg(t) {
+  tf($('b1'), { x: -250 + Math.sin(t * .23) * 120, y: -200 + Math.cos(t * .19) * 90 });
+  tf($('b2'), { x: 380 + Math.cos(t * .17) * 140, y: 1150 + Math.sin(t * .21) * 120 });
+  tf($('b3'), { x: 600 + Math.sin(t * .29) * 160, y: 400 + Math.cos(t * .25) * 160 });
+  tf($('dots'), { x: -(t * 6) % 46, y: -(t * 4) % 46 });
+  const dark = 1 - P(t, T.turn, T.turn + .6);
+  $('dim').style.opacity = .32 * dark;
+}
+
+function phoneA(tc, t, glitch) {
+  const el = $('phoneA');
+  // resting float, the "portlab" shake, the swap to the seller, the outro fly-away
+  let x = PH.x, y = PH.y + Math.sin(t * 1.3) * 6, r = Math.sin(t * .9) * .6, s = PH.s, o = 1;
+  const sh = 1 - P(tc, T.portlab, T.portlab + .45);
+  if (tc >= T.portlab && sh > 0) { x += Math.sin(tc * 90) * 14 * sh; r += Math.sin(tc * 70) * 1.5 * sh; }
+  const sw = eio(P(t, SWAP, SWAP + .6));
+  x += lerp(0, -760, sw); r += lerp(0, -12, sw); s *= lerp(1, .84, sw); o = 1 - P(t, SWAP + .3, SWAP + .6);
+  if (glitch) x += Math.sin(t * 160) * 10;
+  tf(el, { x, y, r, s, o });
+  vis(el, o > 0);
+  el.style.filter = glitch ? 'drop-shadow(10px 0 0 rgba(255,40,90,.55)) drop-shadow(-10px 0 0 rgba(0,210,255,.55)) contrast(1.15)' : 'none';
+
+  // which screen is up
+  const showIg = tc < CH0, showDm = tc >= CH0 && tc < T.lost, showLost = tc >= T.lost && t < WIPE[0] + .38;
+  const showTg = t >= TG0;
+  vis($('ig'), showIg && !showTg);
+  ['chat0', 'chat1', 'chat2'].forEach(id => vis($(id), false));
+  vis($('phDim'), false);
+  vis($('tg'), false); vis($('mini'), false); vis($('prod'), false);
+  if (showTg) { telegram(t); return; }
+  if (showIg) instagram(tc);
+  else if (showDm) dms(tc);
+  else if (showLost) lost(tc);
+}
+
+function instagram(t) {
+  let n = 0;
+  NFS.forEach((el, i) => {
+    if (t < NT[i]) { vis(el, false); return; }
+    n++;
+  });
+  NFS.forEach((el, i) => {
+    if (t < NT[i]) return;
+    const after = NT.filter((x, j) => j > i && x <= t).length;  // newer banners push this one down
+    const k = back(P(t, NT[i], NT[i] + .28));
+    const y = lerp(-150, 96 + Math.min(after, 5) * 120, after ? 1 : k);
+    const o = after > 4 ? 0 : after > 3 ? .5 : 1;
+    vis(el, o > 0);
+    tf(el, { y, s: 1 - Math.min(after, 5) * .025, o: o * (after ? 1 : P(t, NT[i], NT[i] + .12)) });
+    el.style.zIndex = 100 - after;
+  });
+  const cnt = Math.min(99, Math.round(n * 5.3));
+  $('dmBadge').textContent = n >= NT.length - 2 ? '99+' : String(Math.max(1, cnt));
+  tf($('dmBadge'), { s: 1 + .25 * (1 - P(t, NT[Math.max(0, n - 1)], NT[Math.max(0, n - 1)] + .15)) });
+}
+
+function chatState(i, t, s, lostMode) {
+  const el = $('chat' + i); vis(el, true);
+  const lt = t - s;
+  // slide in from the right, slide out to the left
+  const inK = lostMode ? 1 : eo(P(lt, 0, .2)), outK = lostMode ? 0 : eio(P(lt, CHD - .14, CHD));
+  tf(el, { x: lerp(676, 0, inK) - outK * 676 });
+  const q = $('q' + i), r = $('r' + i);
+  tf(q, { s: lostMode ? 1 : back(P(lt, .1, .3)), o: lostMode ? 1 : P(lt, .1, .18) });
+  const typed = lostMode ? 1 : P(lt, .3, 1.15), txt = CHATS[i].r;
+  $('in' + i).textContent = (lt > 1.25 || lostMode) ? '' : txt.slice(0, Math.round(txt.length * typed));
+  const sent = lostMode || lt > 1.25;
+  vis(r, sent); tf(r, { s: lostMode ? 1 : back(P(lt, 1.25, 1.45)) });
+  // keyboard key flicker while typing
+  const keys = el.querySelectorAll('.k');
+  const on = !lostMode && lt > .3 && lt < 1.2 ? Math.floor(lt * 24) % keys.length : -1;
+  keys.forEach((k, j) => k.classList.toggle('on', j === (on * 7) % keys.length));
+  vis($('kb' + i), !lostMode);
+  vis($('seen' + i), lostMode && t > T.lost + .25);
+  const typ = lostMode && t > T.lost + .55 && t < T.lost + 1.15;
+  vis($('typ' + i), typ);
+  $('typ' + i).querySelectorAll('i').forEach((d, j) => { d.style.transform = `translateY(${Math.sin(t * 12 - j) * 6}px)`; });
+}
+
+function dms(t) {
+  const i = clamp(Math.floor((t - CH0) / CHD), 0, 2);
+  chatState(i, t, CH0 + i * CHD, false);
+}
+
+function lost(t) {
+  chatState(0, t, CH0, true);
+  const d = $('phDim'); vis(d, true); d.style.opacity = .38 * P(t, T.lost + 1.3, T.lost + 1.8);
+}
+
+function props(t, tc, glitch) {
+  // spinning clock while the seller types
+  const ck = win(tc, CH0 + .05, T.lost - .05, .25) * (glitch ? .6 : 1);
+  vis($('clock'), ck > 0);
+  tf($('clock'), { x: 850, y: 360 + Math.sin(t * 2) * 10, s: lerp(.6, 1, eo(ck)), o: ck });
+  const lt = Math.max(0, tc - CH0);
+  $('mh').setAttribute('transform', `rotate(${lt * 900} 50 50)`);
+  $('hh').setAttribute('transform', `rotate(${lt * 75} 50 50)`);
+  // the customer walks off to another shop
+  const st = win(tc, T.lost + .4, T.lost + 2.4, .3);
+  vis($('store'), st > 0);
+  tf($('store'), { x: 850, y: 980, s: lerp(.7, 1, back(P(tc, T.lost + .4, T.lost + .7))), o: st });
+  const fk = P(tc, T.lost + .45, T.lost + 1.35);
+  const [ax, ay] = S2(70, 132);
+  vis($('flyer'), fk > 0 && fk < 1);
+  tf($('flyer'), { x: lerp(ax - 60, 900, eio(fk)), y: lerp(ay - 60, 1050, eio(fk)) - Math.sin(fk * Math.PI) * 260, s: lerp(1, .55, fk), r: fk * 25, o: 1 - P(fk, .85, 1) });
+}
+
+function telegram(t) {
+  vis($('tg'), t < SHEET + .6);
+  const b = back(P(t, T.tg + .1, T.tg + .38));
+  tf($('tgb'), { s: b, o: P(t, T.tg + .1, T.tg + .2) }); $('tgb').style.transformOrigin = '0 100%';
+  tf($('ibtn'), { y: (1 - eo(P(t, T.tg + .3, T.tg + .55))) * 30, o: P(t, T.tg + .3, T.tg + .5) });
+  $('ibtn').style.background = (t > TAP.open && t < TAP.open + .25) ? 'rgba(40,70,30,.55)' : 'rgba(60,90,50,.32)';
+  const sh = P(t, SHEET, SHEET + .55);
+  vis($('mini'), sh > 0 && t < PRODIN + .6);
+  tf($('mini'), { y: lerp(1436, 0, back(sh) * 1) });
+  if (sh > 0) catalog(t);
+  if (t >= PRODIN) product(t);
+}
+
+function catalog(t) {
+  const up = eio(P(t, T.cat + .2, T.cat + 2.0)), down = eio(P(t, T.cat + 2.1, T.cat + 2.6));
+  const sy = 640 * up - 640 * down;
+  tf($('mscroll'), { y: -sy });
+  // chip indicator slides from "Hammasi" to "Ko'ylaklar"
+  const ck = eio(P(t, TAP.chip, TAP.chip + .3));
+  $('chipInd').style.left = lerp(0, 164, ck) + 'px'; $('chipInd').style.width = lerp(150, 180, ck) + 'px';
+  CHIPS.forEach((c, i) => $('chip' + i).classList.toggle('act', (i === 0 && ck < .5) || (i === 1 && ck >= .5)));
+  const g = P(t, TAP.chip + .05, TAP.chip + .4);
+  tf($('gridA'), { y: g * 40, o: 1 - g }); tf($('gridB'), { y: (1 - eo(g)) * 60, o: g });
+  vis($('gridB'), g > 0); vis($('gridA'), g < 1);
+  // the tapped card squeezes
+  const first = $('gridB').children[0];
+  const pr = t > TAP.card && t < TAP.card + .25 ? .96 : 1;
+  tf(first, { s: pr });
+}
+
+let lastColor = '';
+function product(t) {
+  const k = eo(P(t, PRODIN, PRODIN + .45));
+  const el = $('prod'); vis(el, true);
+  // grows out of the first card
+  const [cx, cy] = [178, 170 + 380 + 165];
+  el.style.transformOrigin = `${cx}px ${cy}px`;
+  tf(el, { s: lerp(.44, 1, k), o: P(t, PRODIN, PRODIN + .15) });
+  el.style.borderRadius = lerp(28, 0, k) + 'px';
+  // colour
+  const c0 = '#E9DFCC', c1 = '#24426A', c2 = '#6E7C4A';
+  let col = c0;
+  if (t >= TAP.c1) col = mix(c0, c1, P(t, TAP.c1, TAP.c1 + .25));
+  if (t >= TAP.c2) col = mix(c1, c2, P(t, TAP.c2, TAP.c2 + .25));
+  if (col !== lastColor) { $('pdressWrap').innerHTML = G.dress(col).replace('<svg', '<svg id="pdress"'); lastColor = col; }
+  const bump = Math.max(win(t, TAP.c1, TAP.c1 + .35, .17), win(t, TAP.c2, TAP.c2 + .35, .17));
+  tf($('pdressWrap'), { s: 1 + bump * .05 });
+  const sel = t >= TAP.c2 ? 2 : t >= TAP.c1 ? 1 : 0;
+  tf($('swRing'), { x: 26 + sel * 90, y: 1030 });
+  // sizes
+  const shake = 1 - P(t, TAP.szL, TAP.szL + .45);
+  tf($('szL'), { x: t > TAP.szL ? Math.sin((t - TAP.szL) * 55) * 12 * shake : 0 });
+  $('szM').classList.toggle('sel', t >= TAP.szM);
+  tf($('szM'), { s: t >= TAP.szM ? back(P(t, TAP.szM, TAP.szM + .25)) : 1 });
+  const ts = win(t, TAP.szL + .1, TAP.szM - .1, .2);
+  vis($('toast'), ts > 0); $('toast').style.opacity = ts; $('toast').style.transform = `translateX(-50%) translateY(${(1 - ts) * 20}px)`;
+  // add to cart: the dress flies into the cart button
+  const fk = P(t, ADD + .05, ADD + .55);
+  vis($('fly2'), fk > 0 && fk < 1);
+  if (fk > 0 && fk < 1) {
+    if (!$('fly2').innerHTML) $('fly2').innerHTML = G.dress('#6E7C4A');
+    tf($('fly2'), { x: lerp(238, -22, eio(fk)), y: lerp(300, 1250, eio(fk)) - Math.sin(fk * Math.PI) * 180, s: lerp(1, .2, eio(fk)), r: fk * -30 });
+  }
+  vis($('cartBadge'), t > ADD + .55); tf($('cartBadge'), { s: back(P(t, ADD + .55, ADD + .8)) });
+  $('addb').style.filter = t > TAP.add && t < TAP.add + .2 ? 'brightness(.85)' : 'none';
+  // checkout sheet
+  const ch = P(t, CHECK, CHECK + .4);
+  vis($('sheetBg'), ch > 0); $('sheetBg').style.opacity = ch;
+  vis($('sheet'), ch > 0); tf($('sheet'), { y: lerp(1436, 286, back(ch)) });
+  const pk = P(t, PIN, PIN + .35);
+  vis($('pin'), pk > 0); tf($('pin'), { y: lerp(-120, 0, pk * pk) - (pk === 1 ? Math.sin(P(t, PIN + .35, PIN + .6) * Math.PI) * 14 : 0) });
+  const paying = t > TAP.pay && t < OK;
+  vis($('spin'), paying); vis($('payTxt'), !paying);
+  $('spin').style.transform = `rotate(${t * 900}deg)`;
+  // success
+  const ok = P(t, OK, OK + .3);
+  vis($('ok'), ok > 0); $('ok').style.opacity = ok;
+  tf($('okc'), { s: back(P(t, OK + .05, OK + .4)) });
+  $('okPath').setAttribute('stroke-dashoffset', 22 * (1 - eo(P(t, OK + .25, OK + .55))));
+  CONF.forEach(c => {
+    const lt = t - OK - .1;
+    vis(c.el, lt > 0 && lt < 1.6);
+    if (lt > 0) tf(c.el, { x: 330 + c.vx * lt, y: 520 + c.vy * lt + 700 * lt * lt, r: c.r + lt * 500, o: 1 - P(lt, 1.1, 1.6) });
+  });
+}
+
+function seller(t) {
+  const el = $('phoneB');
+  const k = eio(P(t, SWAP + .05, SWAP + .65));
+  const out = eio(P(t, OUT - .05, OUT + .5));
+  vis(el, k > 0 && out < 1);
+  tf(el, { x: PH.x + lerp(820, 0, k), y: PH.y + Math.sin(t * 1.3) * 6 + lerp(0, -1700, out), r: lerp(14, 0, k) + out * 10, s: PH.s });
+  const ab = win(t, SWAP + .6, SWAP + 1.9, .25);
+  vis($('aban'), ab > 0); tf($('aban'), { y: lerp(-160, 60, eo(Math.min(1, ab * 1.3))), o: ab });
+  const oc = P(t, SWAP + 1.1, SWAP + 1.4);
+  vis($('ocard'), oc > 0); tf($('ocard'), { s: back(oc), o: P(t, SWAP + 1.1, SWAP + 1.2) }); $('ocard').style.transformOrigin = '0 100%';
+  const hl = [[0, T.nima], [1, T.razmer], [2, T.qayer], [4, T.pul]];
+  [0, 1, 2, 3, 4].forEach(i => { $('or' + i).style.background = 'transparent'; tf($('or' + i), {}); });
+  hl.forEach(([i, at]) => {
+    const h = P(t, at - .05, at + .2);
+    if (h > 0) {
+      $('or' + i).style.background = `rgba(201,109,34,${.18 * h})`;
+      tf($('or' + i), { s: 1 + .04 * win(t, at - .05, at + .45, .2) });
+    }
+  });
+  // floating widgets
+  const w1 = win(t, SWAP + 1.5, OUT + .1, .35) * (1 - out);
+  vis($('w1'), w1 > 0); tf($('w1'), { x: (1 - eo(w1)) * -300, o: w1, r: -3 });
+  const n = Math.round(lerp(2268000, 2457000, eio(P(t, T.pul, T.pul + 1.0))));
+  $('w1n').textContent = n.toLocaleString('en-US').replace(/,/g, ' ') + " so'm";
+  const bars = $('bars').children, last = bars[bars.length - 1];
+  last.style.height = lerp(30, 104, eio(P(t, T.pul, T.pul + .8))) + 'px';
+  last.style.background = t > T.pul ? 'var(--orange)' : '#e7dfd3';
+  const w2 = win(t, T.razmer, OUT + .1, .3) * (1 - out);
+  vis($('w2'), w2 > 0); tf($('w2'), { x: (1 - eo(w2)) * -300, o: w2, r: 2 });
+  $('w2n').textContent = t > T.qayer + .3 ? '4' : '5';
+}
+
+function finger(t) {
+  const K = [
+    [T.tg + .45, 430, 1000], [TAP.open - .3, 294, 545], [TAP.open + .35, 294, 545], [T.cat - .2, 470, 1050],
+    [TAP.chip - .35, 254, 490], [TAP.chip + .3, 254, 490], [TAP.card - .35, 178, 735], [TAP.card + .2, 178, 735],
+    [TAP.c1 - .4, 160, 1074], [TAP.c1 + .2, 160, 1074], [TAP.c2 - .4, 250, 1074], [TAP.c2 + .3, 250, 1074],
+    [TAP.szL - .4, 381, 1230], [TAP.szL + .3, 381, 1230], [TAP.szM - .4, 237, 1230], [TAP.szM + .3, 237, 1230],
+    [TAP.add - .35, 398, 1371], [TAP.add + .15, 398, 1371], [TAP.cartI - .25, 78, 1371], [TAP.cartI + .1, 78, 1371],
+    [TAP.pay - .4, 338, 1336], [TAP.pay + .3, 338, 1336],
+  ];
+  const on = win(t, K[0][0], OK + .1, .25);
+  vis($('finger'), on > 0);
+  if (on <= 0) return;
+  let x = K[0][1], y = K[0][2];
+  for (let i = 0; i < K.length - 1; i++) {
+    if (t >= K[i][0] && t <= K[i + 1][0]) { const k = eio(P(t, K[i][0], K[i + 1][0])); x = lerp(K[i][1], K[i + 1][1], k); y = lerp(K[i][2], K[i + 1][2], k); break; }
+    if (t > K[i + 1][0]) { x = K[i + 1][1]; y = K[i + 1][2]; }
+  }
+  const [sx, sy] = S2(x, y);
+  $('finger').style.opacity = on;
+  tf($('finger'), { x: sx, y: sy });
+  const taps = Object.values(TAP);
+  const tp = taps.find(a => t >= a && t < a + .45);
+  const pr = taps.some(a => t >= a - .06 && t < a + .12);
+  tf($('fdot'), { s: pr ? .78 : 1 });
+  vis($('fring'), !!tp);
+  if (tp) { const k = P(t, tp, tp + .45); tf($('fring'), { s: lerp(.6, 2.4, eo(k)), o: .8 * (1 - k) }); }
+}
+
+function wipe(t) {
+  const k = P(t, WIPE[0], WIPE[1]);
+  vis($('wipe'), k > 0 && k < 1);
+  const a = -24;
+  tf($('bandO'), { x: lerp(-2600, 2600, eio(k)), y: 100, r: a });
+  tf($('bandC'), { x: lerp(-2600, 2600, eio(P(k, .08, 1))), y: 700, r: a });
+}
+
+function outro(t) {
+  const L = $('logo');
+  vis(L, t > OUT + .4);
+  const fl = Math.sin(t * 1.2) * 6;
+  tf(L, { y: fl, s: lerp(1, 1.04, P(t, OUT + 2, TL.duration)) });
+  const sb = eo(P(t, OUT + .5, OUT + .85)), sa = eo(P(t, OUT + .65, OUT + .95));
+  $('sb').setAttribute('transform', `translate(0 ${lerp(-700, 0, sb)})`);
+  $('sa').setAttribute('transform', `translate(0 ${lerp(700, 0, sa)})`);
+  $('sb').style.opacity = sb > 0 ? 1 : 0; $('sa').style.opacity = sa > 0 ? 1 : 0;
+  $('ra').setAttribute('stroke-dashoffset', 880 * (1 - eio(P(t, OUT + .85, OUT + 1.45))));
+  $('rb').setAttribute('stroke-dashoffset', 880 * (1 - eio(P(t, OUT + .95, OUT + 1.55))));
+  const wm = eo(P(t, OUT + 1.45, OUT + 1.95));
+  tf($('wordmark'), { y: (1 - wm) * 30, o: wm });
+}
+
+// ?nocap renders clean frames (no captions, no finger) for covers
+const NOCAP = new URLSearchParams(location.search).has('nocap');
+// ---------- master ----------
+function seek(t) {
+  let tc = t, glitch = false;
+  if (t > REW[0] && t < REW[1]) { const p = P(t, REW[0], REW[1]); tc = lerp(T.turn - 1.05, 0.5, p * p); glitch = true; }
+  bg(t);
+  captions(t, NOCAP || glitch || (t > WIPE[0] && t < WIPE[0] + .35));
+  phoneA(tc, t, glitch);
+  props(t, tc, glitch);
+  seller(t);
+  finger(t); if (NOCAP) vis($('finger'), false);
+  wipe(t);
+  outro(t);
+  vis($('rew'), glitch); vis($('scan'), glitch);
+  tf($('rew'), { x: Math.sin(t * 40) * 4, o: .9 });
+  tf($('grain'), { x: (Math.floor(t * 24) * 37) % 100 - 50, y: (Math.floor(t * 24) * 53) % 100 - 50 });
+}
+window.seek = seek;
+window.SFX = SFX;
+window.READY = document.fonts.ready.then(() => { seek(0); return true; });
+// preview mode: ?t=12.3 shows one frame, otherwise plays in real time
+const qp = new URLSearchParams(location.search);
+if (qp.has('t')) READY.then(() => seek(+qp.get('t')));
+else if (!qp.has('render')) { const t0 = performance.now(); const loop = () => { seek(((performance.now() - t0) / 1000) % TL.duration); requestAnimationFrame(loop); }; READY.then(loop); }
+</script>
+</body>
+</html>

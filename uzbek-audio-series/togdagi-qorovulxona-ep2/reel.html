@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tog'dagi Qorovulxona: 2-Qism — Ostonadagi To'qnashuv</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #020306; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  canvas { width: 100vw; height: 177.77vw; max-width: 56.25vh; max-height: 100vh; display: block; box-shadow: 0 0 60px rgba(0,0,0,0.95); }
+  .ui { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; background: rgba(8,10,16,0.88); padding: 10px 18px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.12); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 13px; z-index: 100; backdrop-filter: blur(10px); }
+  button { background: #1e2434; color: #f0f0f5; border: 1px solid #3c445c; border-radius: 20px; padding: 6px 14px; cursor: pointer; font: inherit; font-weight: 600; }
+  button:hover { background: #2f3850; }
+  #track { width: 220px; height: 6px; background: #222; border-radius: 3px; position: relative; cursor: pointer; }
+  #fill { width: 0%; height: 100%; background: #dc2626; border-radius: 3px; }
+  #time-disp { min-width: 80px; text-align: center; font-variant-numeric: tabular-nums; opacity: 0.85; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+
+<div class="ui" id="ui-bar">
+  <button id="btn-play">▶ Ijro</button>
+  <div id="track"><div id="fill"></div></div>
+  <span id="time-disp">00:00 / 00:00</span>
+</div>
+
+<audio id="audio" src="mix.wav" preload="auto"></audio>
+<script src="timeline.js"></script>
+
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('btn-play');
+const track = document.getElementById('track');
+const fill = document.getElementById('fill');
+const timeDisp = document.getElementById('time-disp');
+
+const TL_DATA = window.TL || { duration: 157.14, lines: [] };
+const DURATION = TL_DATA.duration;
+
+// Load all 10 cinematic shot artworks
+const SHOT_COUNT = 10;
+const shotImages = {};
+let loadedCount = 0;
+
+for (let s = 1; s <= SHOT_COUNT; s++) {
+  const sid = String(s).padStart(2, '0');
+  const img = new Image();
+  img.src = `shots/shot_${sid}.jpg`;
+  shotImages[s] = img;
+  img.onload = () => {
+    loadedCount++;
+    if (loadedCount === SHOT_COUNT) {
+      window.READY = true;
+      seek(0);
+    }
+  };
+}
+
+// Pseudo-random generator for deterministic snow & ember particles
+function sfc32(a, b, c, d) {
+  return function() {
+    a |= 0; b |= 0; c |= 0; d |= 0;
+    var t = (a + b | 0) + d | 0;
+    d = d + 1 | 0;
+    a = b ^ b >>> 9;
+    b = c + (c << 3) | 0;
+    c = c << 21 | c >>> 11;
+    c = c + t | 0;
+    return (t >>> 0) / 4294967296;
+  }
+}
+
+const rng = sfc32(111, 222, 333, 444);
+const SNOW_COUNT = 380;
+const snowParticles = [];
+for (let i = 0; i < SNOW_COUNT; i++) {
+  snowParticles.push({
+    x: rng() * W * 1.5 - W * 0.25,
+    y: rng() * H,
+    r: 1.2 + rng() * 3.5,
+    speedX: 25 + rng() * 45, // faster wind blowing through open door
+    speedY: 15 + rng() * 26,
+    alpha: 0.25 + rng() * 0.65
+  });
+}
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// Pre-compute continuous monotonic shot blocks with strictly zero jumps
+const SHOT_BLOCKS = [];
+let prevT = 0;
+for (let i = 0; i < TL_DATA.lines.length; i++) {
+  const line = TL_DATA.lines[i];
+  const nextLine = TL_DATA.lines[i + 1];
+  const blockEnd = nextLine ? ((line.b + nextLine.a) * 0.5) : DURATION;
+  
+  if (SHOT_BLOCKS.length > 0 && SHOT_BLOCKS[SHOT_BLOCKS.length - 1].shot === line.shot) {
+    SHOT_BLOCKS[SHOT_BLOCKS.length - 1].t1 = blockEnd;
+  } else {
+    SHOT_BLOCKS.push({
+      shot: line.shot,
+      t0: prevT,
+      t1: blockEnd
+    });
+    prevT = blockEnd;
+  }
+}
+if (SHOT_BLOCKS.length > 0) {
+  SHOT_BLOCKS[SHOT_BLOCKS.length - 1].t1 = DURATION;
+}
+
+// Special timing for Climax action shot: cut to Shot 10 at t=140.0s
+for (let b of SHOT_BLOCKS) {
+  if (b.shot === 10) {
+    b.t0 = Math.min(b.t0, 140.0);
+    break;
+  }
+}
+
+function seek(t) {
+  t = clamp(t, 0, DURATION);
+
+  // 1. Determine active dialogue line (subtitles only)
+  let currentLine = null;
+  for (let i = 0; i < TL_DATA.lines.length; i++) {
+    const line = TL_DATA.lines[i];
+    if (t >= line.a && t <= line.b) {
+      currentLine = line;
+      break;
+    }
+  }
+
+  // Determine active shot block (continuous camera motion)
+  let activeShot = 1;
+  let shotStartTime = 0;
+  let shotEndTime = DURATION;
+  for (let i = 0; i < SHOT_BLOCKS.length; i++) {
+    const sb = SHOT_BLOCKS[i];
+    if (t >= sb.t0 && (t < sb.t1 || i === SHOT_BLOCKS.length - 1)) {
+      activeShot = sb.shot;
+      shotStartTime = sb.t0;
+      shotEndTime = sb.t1;
+      break;
+    }
+  }
+
+  // Clear background
+  ctx.fillStyle = '#020306';
+  ctx.fillRect(0, 0, W, H);
+
+  // Screen shake calculation
+  let shakeX = 0, shakeY = 0;
+  // Door kick impact shake (t=4.5 to 5.2s)
+  if (t >= 4.5 && t <= 5.2) {
+    const decay = (5.2 - t) / 0.7;
+    shakeX = Math.sin(t * 70) * 16 * decay;
+    shakeY = Math.cos(t * 85) * 14 * decay;
+  }
+  // Shotgun blast shake (t=141.6 to 142.8s)
+  if (t >= 141.6 && t <= 142.8) {
+    const decay = (142.8 - t) / 1.2;
+    shakeX = Math.sin(t * 90) * 24 * decay;
+    shakeY = Math.cos(t * 110) * 22 * decay;
+  }
+
+  // 2. Draw Active Shot Image with Ken Burns Camera Motion
+  const shotImg = shotImages[activeShot];
+  if (shotImg && shotImg.complete) {
+    ctx.save();
+
+    const shotDuration = Math.max(1.5, shotEndTime - shotStartTime);
+    const shotProgress = clamp((t - shotStartTime) / shotDuration, 0, 1);
+    
+    // Smooth cinematic scale: 1.0 -> 1.065
+    const scale = 1.0 + shotProgress * 0.065;
+    const panX = ((activeShot % 2 === 0) ? -1 : 1) * shotProgress * 20 + shakeX;
+    const panY = -shotProgress * 16 + shakeY;
+
+    ctx.translate(W * 0.5 + panX, H * 0.5 + panY);
+    ctx.scale(scale, scale);
+    ctx.translate(-W * 0.5, -H * 0.5);
+
+    // Draw full 9:16 vertical image
+    ctx.drawImage(shotImg, 0, 0, W, H);
+
+    ctx.restore();
+  }
+
+  // 3. Environmental Overlays
+  // 3a. Tactical Red Laser Sight (active during mercenary shots: 1, 2, 7, 9)
+  if ([1, 2, 7, 9].includes(activeShot) && t > 5.0 && t < 140.0) {
+    ctx.save();
+    const laserAlpha = 0.75 + Math.sin(t * 12) * 0.2;
+    ctx.strokeStyle = `rgba(239, 68, 68, ${laserAlpha * 0.85})`;
+    ctx.lineWidth = 3.5;
+    ctx.shadowColor = '#ef4444';
+    ctx.shadowBlur = 12;
+
+    const laserJitterY = Math.sin(t * 4.5) * 6;
+    ctx.beginPath();
+    ctx.moveTo(W * 0.2, H * 0.52 + laserJitterY);
+    ctx.lineTo(W * 0.82, H * 0.48 - laserJitterY * 0.5);
+    ctx.stroke();
+
+    // Laser Dot
+    ctx.fillStyle = '#ff2222';
+    ctx.beginPath();
+    ctx.arc(W * 0.82, H * 0.48 - laserJitterY * 0.5, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 3b. Hearth Firelight & Lantern Flicker
+  const flicker = 0.08 + Math.sin(t * 14.2) * 0.035 + Math.cos(t * 22.7) * 0.025;
+  const fireGrad = ctx.createRadialGradient(W * 0.85, H * 0.82, 50, W * 0.85, H * 0.82, 850);
+  fireGrad.addColorStop(0, `rgba(245, 158, 11, ${flicker})`);
+  fireGrad.addColorStop(0.6, `rgba(217, 119, 6, ${flicker * 0.45})`);
+  fireGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = fireGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // 3c. Raging Snowstorm Particles blowing through the door
+  ctx.save();
+  for (let i = 0; i < snowParticles.length; i++) {
+    const p = snowParticles[i];
+    const px = (p.x + t * p.speedX * 36) % (W * 1.5) - W * 0.25;
+    const py = (p.y + t * p.speedY * 22) % H;
+
+    ctx.fillStyle = `rgba(240, 246, 255, ${p.alpha})`;
+    ctx.beginPath();
+    ctx.arc(px, py, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // 3d. Dark Cinematic Vignette
+  const vig = ctx.createRadialGradient(W * 0.5, H * 0.5, H * 0.35, W * 0.5, H * 0.5, H * 0.72);
+  vig.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vig.addColorStop(0.7, 'rgba(2, 3, 6, 0.45)');
+  vig.addColorStop(1, 'rgba(1, 2, 4, 0.88)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, W, H);
+
+  // 3e. Climax Lighting FX (Lantern flame eruption, shotgun muzzle flash)
+  // Lantern Shatter Fire Flash (t=140.2s to 141.5s)
+  if (t >= 140.2 && t <= 141.5) {
+    const fAlpha = clamp(1.0 - (t - 140.2) / 1.3, 0, 1);
+    const fireFlash = ctx.createRadialGradient(W * 0.5, H * 0.5, 40, W * 0.5, H * 0.5, W);
+    fireFlash.addColorStop(0, `rgba(251, 146, 60, ${fAlpha * 0.9})`);
+    fireFlash.addColorStop(0.5, `rgba(234, 88, 12, ${fAlpha * 0.6})`);
+    fireFlash.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fireFlash;
+    ctx.fillRect(0, 0, W, H);
+  }
+  // Shotgun Muzzle Flash (t=141.6s to 142.1s)
+  if (t >= 141.6 && t <= 142.1) {
+    const mAlpha = clamp(1.0 - (t - 141.6) / 0.5, 0, 1);
+    ctx.fillStyle = `rgba(255, 255, 245, ${mAlpha * 0.95})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // 4. Subtitles & Dialogue Rendering
+  if (currentLine && t < 147.0) {
+    let tagColor = '#fbbf24';
+    if (currentLine.char === 'boshliq') tagColor = '#ef4444';
+    if (currentLine.char === 'rustam') tagColor = '#38bdf8';
+
+    const boxY = H * 0.79;
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    // Speaker Name Badge
+    ctx.font = '700 24px Montserrat';
+    ctx.fillStyle = tagColor;
+    ctx.fillText(currentLine.speaker, W * 0.5, boxY);
+
+    // Dialogue Text
+    ctx.font = '600 38px Montserrat';
+    ctx.fillStyle = '#ffffff';
+
+    const words = currentLine.text.split(' ');
+    let linesArr = [];
+    let curLine = '';
+    for (const w of words) {
+      const test = curLine ? `${curLine} ${w}` : w;
+      if (ctx.measureText(test).width > W * 0.86) {
+        linesArr.push(curLine);
+        curLine = w;
+      } else {
+        curLine = test;
+      }
+    }
+    if (curLine) linesArr.push(curLine);
+
+    for (let li = 0; li < linesArr.length; li++) {
+      const lineY = boxY + 54 + (li * 50);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.98)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
+      ctx.fillText(linesArr[li], W * 0.5, lineY);
+    }
+    ctx.restore();
+  }
+
+  // 5. Intro & Outro Cinematic Title Cards
+  // Intro (t=0 to 4.8s)
+  if (t < 4.8) {
+    const introAlpha = (t < 1.0) ? t : clamp((4.8 - t) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = introAlpha;
+    ctx.fillStyle = 'rgba(2, 3, 6, 0.85)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'center';
+    ctx.font = '800 52px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('TOG‘DAGI QOROVULXONA', W * 0.5, H * 0.44);
+
+    ctx.font = '600 28px Montserrat';
+    ctx.fillStyle = '#ef4444';
+    ctx.fillText('2-QISM  ·  OSTONADAGI TO‘QNASHUV', W * 0.5, H * 0.50);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Psixologik Detektiv Triller', W * 0.5, H * 0.55);
+    ctx.restore();
+  }
+
+  // Outro Cliffhanger (t >= 148.0s)
+  if (t >= 148.0) {
+    ctx.fillStyle = '#010204';
+    ctx.fillRect(0, 0, W, H);
+
+    const outroAlpha = clamp((t - 148.0) / 1.5, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = outroAlpha;
+
+    ctx.textAlign = 'center';
+    ctx.font = '800 52px Cinzel';
+    ctx.fillStyle = '#ef4444';
+    ctx.fillText('DAVOMI 3-QISMDA', W * 0.5, H * 0.46);
+
+    ctx.font = '500 28px Montserrat';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('Qorong‘udagi o‘q kimga tegdi?..', W * 0.5, H * 0.52);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Kutilmagan burilishlar davom etadi', W * 0.5, H * 0.57);
+    ctx.restore();
+  }
+}
+
+// UI & Audio sync handlers
+playBtn.onclick = () => {
+  if (audio.paused) {
+    audio.play();
+    playBtn.textContent = '❚❚ Pauza';
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶ Ijro';
+  }
+};
+
+audio.ontimeupdate = () => {
+  const t = audio.currentTime;
+  seek(t);
+  const pct = (t / DURATION) * 100;
+  fill.style.width = pct + '%';
+  const m = Math.floor(t / 60);
+  const s = Math.floor(t % 60);
+  const dm = Math.floor(DURATION / 60);
+  const ds = Math.floor(DURATION % 60);
+  timeDisp.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')} / ${String(dm).padStart(2, '0')}:${String(ds).padStart(2, '0')}`;
+};
+
+track.onclick = (e) => {
+  const rect = track.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = ratio * DURATION;
+  seek(audio.currentTime);
+};
+</script>
+</body>
+</html>

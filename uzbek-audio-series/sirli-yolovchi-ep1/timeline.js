@@ -1,0 +1,244 @@
+window.TL = {
+  "title": "Sirli Yo'lovchi — 1-Qism",
+  "author": "Roald Dahl asari asosida",
+  "duration": 175.253,
+  "fps": 30,
+  "width": 1080,
+  "height": 1920,
+  "lines": [
+    {
+      "id": "d01",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Tungi soat ikki. Yomg'ir tinmayapti. Kimsasiz trassada ketayotib, yo'l chetida turgan qorani ko'rib qoldim.",
+      "a": 3.5,
+      "b": 11.027,
+      "dur": 7.527
+    },
+    {
+      "id": "d02",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "O'tiring, o'tiring tezroq! Tashqarida muzlab qolasiz.",
+      "a": 13.227,
+      "b": 16.315,
+      "dur": 3.087
+    },
+    {
+      "id": "d03",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Rahmat, do'stim. Juda olijanob ekansiz.",
+      "a": 17.215,
+      "b": 20.782,
+      "dur": 3.567
+    },
+    {
+      "id": "d04",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Bu vaqtda bu yo'lda odam zoti yurmaydi-ku. Qayerga yo'l oldingiz o'zi?",
+      "a": 22.582,
+      "b": 26.83,
+      "dur": 4.247
+    },
+    {
+      "id": "d05",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Poytaxtga. Siz ham o'sha yoqqami?",
+      "a": 27.73,
+      "b": 30.337,
+      "dur": 2.607
+    },
+    {
+      "id": "d06",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Ha. Lekin men shoshilmayapman. Yo'l sirpanchiq, yomg'ir qattiq.",
+      "a": 31.237,
+      "b": 36.164,
+      "dur": 4.927
+    },
+    {
+      "id": "d07",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Afsus. Menga esa hozir tezlik kerak. Iloji bo'lsa juda katta tezlik.",
+      "a": 37.064,
+      "b": 43.992,
+      "dur": 6.927
+    },
+    {
+      "id": "d08",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Nega buncha shoshasiz? Biror noxushlik yuz berdimi?",
+      "a": 45.492,
+      "b": 48.979,
+      "dur": 3.487
+    },
+    {
+      "id": "d09",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Ertaga tongda bitta uchrashuvim bor. Agar vaqtida bormasam, butun rejam barbod bo'ladi.",
+      "a": 49.879,
+      "b": 55.887,
+      "dur": 6.007
+    },
+    {
+      "id": "d10",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Nima ish qilasiz o'zi? Savdogarmisiz?",
+      "a": 56.787,
+      "b": 59.594,
+      "dur": 2.807
+    },
+    {
+      "id": "d11",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Yo'q... Savdogarlar og'zi bilan ishlaydi. Men esa barmoqlarim bilan.",
+      "a": 60.494,
+      "b": 65.702,
+      "dur": 5.207
+    },
+    {
+      "id": "d12",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Barmoqlar bilan? Pianinochimisiz?",
+      "a": 67.102,
+      "b": 70.189,
+      "dur": 3.087
+    },
+    {
+      "id": "d13",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Pianinochi emish! Qanaqasiga pianinochi bo'lay? Yo'q, do'stim. Dunyoda eng qiyin narsa nima, bilasizmi?",
+      "a": 71.089,
+      "b": 79.256,
+      "dur": 8.167
+    },
+    {
+      "id": "d14",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Nima ekan?",
+      "a": 80.156,
+      "b": 81.404,
+      "dur": 1.247
+    },
+    {
+      "id": "d15",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Odamning ko'zi o'ngida turgan narsani, u qarab turgan paytda ko'rinmas qilish. Bir dona xato qilsangiz — tamom, panjara ortiga ketasiz.",
+      "a": 82.304,
+      "b": 91.871,
+      "dur": 9.567
+    },
+    {
+      "id": "d16",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Shoshmang... Siz o'g'rimisiz? To'g'risini ayting, mashinamga kimni mindirdim?!",
+      "a": 93.871,
+      "b": 99.719,
+      "dur": 5.847
+    },
+    {
+      "id": "d17",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "O'g'ri? Qanaqa qo'pol so'z! O'g'rilar eshik buzadi, kassa buzadi, qon to'kadi... Ular shunchaki nodonlar. Men esa — san'atkorman. Men barmoq ustasiman.",
+      "a": 100.619,
+      "b": 115.026,
+      "dur": 14.407
+    },
+    {
+      "id": "d18",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Menga farqi yo'q. Tushing mashinamdan. Hozir to'xtataman!",
+      "a": 115.926,
+      "b": 119.774,
+      "dur": 3.847
+    },
+    {
+      "id": "d19",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "To'xtashga shoshilmang. Avval o'ng qo'lingizga qarang.",
+      "a": 120.974,
+      "b": 124.701,
+      "dur": 3.727
+    },
+    {
+      "id": "d20",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Qo'limga? Nima bor ekan qo'limda... Shoshma... Qani mening soatim?! O'n yillik soatim qani?!",
+      "a": 126.201,
+      "b": 135.288,
+      "dur": 9.087
+    },
+    {
+      "id": "d21",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Mana, kaftimda. Qarang, qanchalik oson. Hatto ichki cho'ntagingizdagi hamyoningiz ham buni sezmadi.",
+      "a": 137.088,
+      "b": 143.896,
+      "dur": 6.807
+    },
+    {
+      "id": "d22",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Sen... jinmisan?! Buni qachon olding?!",
+      "a": 145.396,
+      "b": 149.483,
+      "dur": 4.087
+    },
+    {
+      "id": "d23",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Siz menga savol berayotganingizda. Men sizga aytdim-ku, tezroq haydang deb. Chunki orqamizdan...",
+      "a": 150.383,
+      "b": 156.111,
+      "dur": 5.727
+    },
+    {
+      "id": "d24",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "Orqamizdan nima?!",
+      "a": 156.911,
+      "b": 158.398,
+      "dur": 1.487
+    },
+    {
+      "id": "d25",
+      "char": "yolovchi",
+      "voice": "Puck",
+      "text": "Qarang orqaga. Chiroqlar yaqinlashyapti. Ular mening orqamdan tushgan.",
+      "a": 159.298,
+      "b": 164.105,
+      "dur": 4.807
+    },
+    {
+      "id": "d26",
+      "char": "haydovchi",
+      "voice": "Charon",
+      "text": "La’nat bo'lsin... Gazni bosishga majburmiz!",
+      "a": 165.305,
+      "b": 168.353,
+      "dur": 3.047
+    }
+  ]
+};

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <!-- "ab" monogram: geometric a + b sharing one split stem. Colours: navy #072940, orange #C96D22 -->
+  <g transform="translate(-2 9)">
+    <g fill="none" stroke-width="64">
+      <circle cx="330" cy="600" r="140" stroke="#072940"/>
+      <circle cx="674" cy="600" r="140" stroke="#C96D22"/>
+    </g>
+    <rect x="438" y="428" width="64" height="344" fill="#072940"/>
+    <rect x="502" y="210" width="64" height="562" fill="#C96D22"/>
+  </g>
+</svg>

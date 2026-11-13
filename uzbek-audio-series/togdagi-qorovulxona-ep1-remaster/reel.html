@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tog'dagi Qorovulxona: Qor Bo'roni — 1-Qism (Cinematic Master)</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #020306; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  canvas { width: 100vw; height: 177.77vw; max-width: 56.25vh; max-height: 100vh; display: block; box-shadow: 0 0 60px rgba(0,0,0,0.95); }
+  .ui { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; background: rgba(8,10,16,0.88); padding: 10px 18px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.12); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 13px; z-index: 100; backdrop-filter: blur(10px); }
+  button { background: #1e2434; color: #f0f0f5; border: 1px solid #3c445c; border-radius: 20px; padding: 6px 14px; cursor: pointer; font: inherit; font-weight: 600; }
+  button:hover { background: #2f3850; }
+  #track { width: 220px; height: 6px; background: #222; border-radius: 3px; position: relative; cursor: pointer; }
+  #fill { width: 0%; height: 100%; background: #d97706; border-radius: 3px; }
+  #time-disp { min-width: 80px; text-align: center; font-variant-numeric: tabular-nums; opacity: 0.85; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+
+<div class="ui" id="ui-bar">
+  <button id="btn-play">▶ Ijro</button>
+  <div id="track"><div id="fill"></div></div>
+  <span id="time-disp">00:00 / 00:00</span>
+</div>
+
+<audio id="audio" src="mix.wav" preload="auto"></audio>
+<script src="timeline.js"></script>
+
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('btn-play');
+const track = document.getElementById('track');
+const fill = document.getElementById('fill');
+const timeDisp = document.getElementById('time-disp');
+
+const TL_DATA = window.TL || { duration: 165.38, lines: [] };
+const DURATION = TL_DATA.duration;
+
+// Load all 10 cinematic shot artworks
+const SHOT_COUNT = 10;
+const shotImages = {};
+let loadedCount = 0;
+
+for (let s = 1; s <= SHOT_COUNT; s++) {
+  const sid = String(s).padStart(2, '0');
+  const img = new Image();
+  img.src = `shots/shot_${sid}.jpg`;
+  shotImages[s] = img;
+  img.onload = () => {
+    loadedCount++;
+    if (loadedCount === SHOT_COUNT) {
+      window.READY = true;
+      seek(0);
+    }
+  };
+}
+
+// Pseudo-random generator for deterministic snow particles
+function sfc32(a, b, c, d) {
+  return function() {
+    a |= 0; b |= 0; c |= 0; d |= 0;
+    var t = (a + b | 0) + d | 0;
+    d = d + 1 | 0;
+    a = b ^ b >>> 9;
+    b = c + (c << 3) | 0;
+    c = c << 21 | c >>> 11;
+    c = c + t | 0;
+    return (t >>> 0) / 4294967296;
+  }
+}
+
+const rng = sfc32(555, 666, 777, 888);
+const SNOW_COUNT = 320;
+const snowParticles = [];
+for (let i = 0; i < SNOW_COUNT; i++) {
+  snowParticles.push({
+    x: rng() * W * 1.4 - W * 0.2,
+    y: rng() * H,
+    r: 1.2 + rng() * 3.2,
+    speedX: 18 + rng() * 35,
+    speedY: 14 + rng() * 22,
+    alpha: 0.25 + rng() * 0.55
+  });
+}
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+
+// Pre-compute continuous cinematic shot blocks with strictly zero jumps
+const SHOT_BLOCKS = [];
+let prevT = 0;
+for (let i = 0; i < TL_DATA.lines.length; i++) {
+  const line = TL_DATA.lines[i];
+  const nextLine = TL_DATA.lines[i + 1];
+  const blockEnd = nextLine ? ((line.b + nextLine.a) * 0.5) : DURATION;
+  
+  if (SHOT_BLOCKS.length > 0 && SHOT_BLOCKS[SHOT_BLOCKS.length - 1].shot === line.shot) {
+    SHOT_BLOCKS[SHOT_BLOCKS.length - 1].t1 = blockEnd;
+  } else {
+    SHOT_BLOCKS.push({
+      shot: line.shot,
+      t0: prevT,
+      t1: blockEnd
+    });
+    prevT = blockEnd;
+  }
+}
+if (SHOT_BLOCKS.length > 0) {
+  SHOT_BLOCKS[SHOT_BLOCKS.length - 1].t1 = DURATION;
+}
+// Special case: Door pounding at 22.35s cuts smoothly to Shot 2
+if (SHOT_BLOCKS.length > 1 && SHOT_BLOCKS[0].shot === 1) {
+  SHOT_BLOCKS[0].t1 = 22.35;
+  SHOT_BLOCKS[1].t0 = 22.35;
+}
+
+// Main render function at timestamp t (seconds)
+function seek(t) {
+  t = clamp(t, 0, DURATION);
+
+  // 1. Determine active dialogue line (for subtitles only)
+  let currentLine = null;
+  for (let i = 0; i < TL_DATA.lines.length; i++) {
+    const line = TL_DATA.lines[i];
+    if (t >= line.a && t <= line.b) {
+      currentLine = line;
+      break;
+    }
+  }
+
+  // Determine active shot with continuous monotonic timing
+  let activeShot = 1;
+  let shotStartTime = 0;
+  let shotEndTime = DURATION;
+  for (let i = 0; i < SHOT_BLOCKS.length; i++) {
+    const sb = SHOT_BLOCKS[i];
+    if (t >= sb.t0 && (t < sb.t1 || i === SHOT_BLOCKS.length - 1)) {
+      activeShot = sb.shot;
+      shotStartTime = sb.t0;
+      shotEndTime = sb.t1;
+      break;
+    }
+  }
+
+  // Clear background
+  ctx.fillStyle = '#020306';
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. Draw Active Shot Image with Ken Burns Camera Motion
+  const shotImg = shotImages[activeShot];
+  if (shotImg && shotImg.complete) {
+    ctx.save();
+
+    // Ken Burns calculation: slow cinematic push-in (zoom) and gentle pan
+    const shotDuration = Math.max(2.0, shotEndTime - shotStartTime);
+    const shotProgress = clamp((t - shotStartTime) / shotDuration, 0, 1);
+    
+    // Smooth cinematic scale: 1.0 -> 1.07
+    const scale = 1.0 + shotProgress * 0.07;
+    // Subtle pan direction based on shot index
+    const panX = ((activeShot % 2 === 0) ? -1 : 1) * shotProgress * 22;
+    const panY = -shotProgress * 18;
+
+    ctx.translate(W * 0.5 + panX, H * 0.5 + panY);
+    ctx.scale(scale, scale);
+    ctx.translate(-W * 0.5, -H * 0.5);
+
+    // Draw full 9:16 vertical image
+    ctx.drawImage(shotImg, 0, 0, W, H);
+
+    ctx.restore();
+  }
+
+  // 3. Dynamic Atmospheric Overlays
+  // A) Fireplace Warm Amber Flicker Overlay (for indoor shots 2, 4, 5, 6, 7, 8, 10)
+  const isIndoor = [2, 4, 5, 6, 7, 8, 10].includes(activeShot);
+  if (isIndoor) {
+    const fireFlicker = Math.sin(t * 14) * 0.06 + Math.cos(t * 23) * 0.04 + 0.12;
+    const fireGrad = ctx.createRadialGradient(W * 0.15, H * 0.70, 50, W * 0.35, H * 0.65, 750);
+    fireGrad.addColorStop(0, `rgba(255, 140, 30, ${fireFlicker * 1.2})`);
+    fireGrad.addColorStop(0.5, `rgba(220, 70, 10, ${fireFlicker * 0.5})`);
+    fireGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = fireGrad;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // B) Outdoor Raging Snow Blizzard Overlay (for outdoor shots 1, 3, 4, 9)
+  const isOutdoor = [1, 3, 4, 9].includes(activeShot);
+  if (isOutdoor) {
+    for (let i = 0; i < snowParticles.length; i++) {
+      const p = snowParticles[i];
+      const xNow = (p.x + t * p.speedX * 35) % (W * 1.4) - W * 0.2;
+      const yNow = (p.y + t * p.speedY * 22) % H;
+      ctx.fillStyle = `rgba(235, 245, 255, ${p.alpha * 0.85})`;
+      ctx.beginPath();
+      ctx.arc(xNow, yNow, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // C) Heavy Cinematic Vignette & Shadow Frame
+  const vignette = ctx.createRadialGradient(W * 0.5, H * 0.5, H * 0.25, W * 0.5, H * 0.5, H * 0.65);
+  vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vignette.addColorStop(0.7, 'rgba(0, 0, 0, 0.45)');
+  vignette.addColorStop(1, 'rgba(0, 0, 0, 0.92)');
+  ctx.fillStyle = vignette;
+  ctx.fillRect(0, 0, W, H);
+
+  // D) Muzzle Flash at Climax (t=159.5s to 160.0s)
+  if (t >= 159.5 && t < 160.0) {
+    const flashAlpha = (160.0 - t) / 0.5;
+    ctx.fillStyle = `rgba(255, 255, 240, ${flashAlpha * 0.95})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // 4. Subtitles & Dialogue Rendering
+  if (currentLine && t < 159.5) {
+    const isSamadov = (currentLine.char === 'samadov');
+    const speakerName = isSamadov ? 'POLKOVNIK SAMADOV (QOROVUL)' : 'RUSTAM (BEGONA)';
+    const tagColor = isSamadov ? '#fbbf24' : '#38bdf8';
+
+    const boxY = H * 0.79;
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    // Speaker Name Badge
+    ctx.font = '700 24px Montserrat';
+    ctx.fillStyle = tagColor;
+    ctx.fillText(speakerName, W * 0.5, boxY);
+
+    // Dialogue Text
+    ctx.font = '600 38px Montserrat';
+    ctx.fillStyle = '#ffffff';
+
+    const words = currentLine.text.split(' ');
+    let linesArr = [];
+    let curLine = '';
+    for (const w of words) {
+      const test = curLine ? `${curLine} ${w}` : w;
+      if (ctx.measureText(test).width > W * 0.86) {
+        linesArr.push(curLine);
+        curLine = w;
+      } else {
+        curLine = test;
+      }
+    }
+    if (curLine) linesArr.push(curLine);
+
+    for (let li = 0; li < linesArr.length; li++) {
+      const lineY = boxY + 54 + (li * 50);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.98)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
+      ctx.fillText(linesArr[li], W * 0.5, lineY);
+    }
+    ctx.restore();
+  }
+
+  // 5. Intro & Outro Cinematic Title Cards
+  // Intro (t=0 to 4.2s)
+  if (t < 4.2) {
+    const introAlpha = (t < 1.0) ? t : clamp((4.2 - t) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = introAlpha;
+    ctx.fillStyle = 'rgba(2, 3, 6, 0.82)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'center';
+    ctx.font = '800 52px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('TOG‘DAGI QOROVULXONA', W * 0.5, H * 0.44);
+
+    ctx.font = '600 28px Montserrat';
+    ctx.fillStyle = '#d97706';
+    ctx.fillText('1-QISM  ·  BO‘RON VA BEGONA', W * 0.5, H * 0.50);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Agatha Christie uslubida', W * 0.5, H * 0.55);
+    ctx.restore();
+  }
+
+  // Outro Cliffhanger (immediately after last dialogue + 1.0s fade)
+  const outroStart = TL_DATA.lines[TL_DATA.lines.length - 1].b + 0.5;
+  if (t >= outroStart) {
+    ctx.fillStyle = '#010204';
+    ctx.fillRect(0, 0, W, H);
+
+    const outroAlpha = clamp((t - outroStart) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = outroAlpha;
+
+    ctx.textAlign = 'center';
+    ctx.font = '800 58px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('1-QISM TUGADI', W * 0.5, H * 0.46);
+
+    ctx.font = '600 32px Montserrat';
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText('DAVOMI BOR...', W * 0.5, H * 0.52);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Keyingi qismda: Ostonadagi to‘qnashuv', W * 0.5, H * 0.58);
+    ctx.restore();
+  }
+}
+
+// Browser Interactive UI
+playBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play();
+    playBtn.textContent = '⏸ Pauza';
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶ Ijro';
+  }
+});
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+audio.addEventListener('timeupdate', () => {
+  const cur = audio.currentTime;
+  seek(cur);
+  const pct = (cur / DURATION) * 100;
+  fill.style.width = pct + '%';
+  timeDisp.textContent = `${formatTime(cur)} / ${formatTime(DURATION)}`;
+});
+
+track.addEventListener('click', e => {
+  const rect = track.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = ratio * DURATION;
+  seek(audio.currentTime);
+});
+
+audio.addEventListener('ended', () => {
+  playBtn.textContent = '▶ Boshidan';
+});
+</script>
+</body>
+</html>

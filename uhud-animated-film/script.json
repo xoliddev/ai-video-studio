@@ -1,0 +1,112 @@
+{
+  "title": "Uhud — A Story of Patience and Obedience",
+  "voice": "en-GB-RyanNeural",
+  "rate": "-6%",
+  "scenes": [
+    { "id": "title", "caption": "", "lead": 2.0, "tail": 4.5, "lines": [
+      { "text": "In the third year after the Hijrah, beneath a mountain north of Madinah, a small band of believers would face one of their hardest tests.",
+        "say": "In the third year after the Hijrah, beneath a mountain north of {madinah}, a small band of believers would face one of their hardest tests." },
+      { "text": "This is the story of Uhud.", "say": "This is the story of {uhud}." }
+    ]},
+    { "id": "makkah", "caption": "MAKKAH · 3 AH", "lines": [
+      { "text": "A year earlier, at Badr, the Quraysh of Makkah had suffered a defeat they could not forget.",
+        "say": "A year earlier, at {badr}, the {quraysh} of {makkah} had suffered a defeat they could not forget." },
+      "Their leaders swore revenge, and poured the profits of an entire trade caravan into a new army."
+    ]},
+    { "id": "march", "caption": "SHAWWAL · 3 AH", "lines": [
+      { "text": "In the month of Shawwal, three thousand men marched north, with two hundred horses and seven hundred coats of armour.",
+        "say": "In the month of {shawwal}, three thousand men marched north, with two hundred horses and seven hundred coats of armour." },
+      { "text": "Abu Sufyan led them. And on their right wing rode the cavalry of a brilliant young commander: Khalid ibn al-Walid.",
+        "say": "{abusufyan} led them. And on their right wing rode the cavalry of a brilliant young commander: {khalid}." }
+    ]},
+    { "id": "madinah", "caption": "MADINAH", "lines": [
+      { "text": "In Madinah, the Messenger of Allah ﷺ gathered his companions for counsel.",
+        "say": "In {madinah}, the Messenger of Allah, {saw}, gathered his companions for counsel." },
+      "His own view was to defend the city from within its walls.",
+      { "text": "But many young men, who had missed the battle of Badr, longed to meet the enemy in the open field.",
+        "say": "But many young men, who had missed the battle of {badr}, longed to meet the enemy in the open field." },
+      { "text": "The Prophet ﷺ accepted the counsel of the majority, and put on his armour.",
+        "say": "The Prophet, {saw}, accepted the counsel of the majority, and put on his armour." }
+    ]},
+    { "id": "split", "caption": "", "lines": [
+      "About one thousand men set out.",
+      { "text": "But on the way, Abdullah ibn Ubayy turned back with nearly three hundred of his followers.",
+        "say": "But on the way, {ibnubayy} turned back with nearly three hundred of his followers." },
+      "Now only seven hundred remained, against an army more than four times their size."
+    ]},
+    { "id": "map", "caption": "", "tail": 1.5, "lines": [
+      { "text": "The Prophet ﷺ placed his army with Mount Uhud at its back.",
+        "say": "The Prophet, {saw}, placed his army with Mount {uhud} at its back." },
+      "To one side rose a small hill. From there, enemy horsemen could sweep around behind the Muslim lines.",
+      { "text": "So he posted fifty archers on that hill, under the command of Abdullah ibn Jubayr.",
+        "say": "So he posted fifty archers on that hill, under the command of {ibnjubayr}." }
+    ]},
+    { "id": "archers", "caption": "", "tail": 1.5, "lines": [
+      "His command to them was clear.",
+      "Even if you see birds snatching at us, do not leave your place until I send for you.",
+      "And even if you see us defeat them, do not leave your place until I send for you."
+    ]},
+    { "id": "battle", "caption": "", "lines": [
+      "The battle began.",
+      { "text": "One after another, the standard-bearers of Quraysh fell.", "say": "One after another, the standard-bearers of {quraysh} fell." },
+      "The arrows of the archers held the enemy cavalry back, and the Muslim ranks pressed forward."
+    ]},
+    { "id": "hamzah", "caption": "", "tail": 2.5, "lines": [
+      { "text": "Among the bravest was Hamzah ibn Abd al-Muttalib, the uncle of the Prophet ﷺ, known as the Lion of Allah.",
+        "say": "Among the bravest was {hamzah}, the uncle of the Prophet, {saw}, known as the Lion of Allah." },
+      { "text": "But hidden among the rocks waited Wahshi, a slave who had been promised his freedom for the life of Hamzah.",
+        "say": "But hidden among the rocks waited {wahshi}, a slave who had been promised his freedom for the life of {hamza}." },
+      "A single spear was thrown, and the Lion of Allah fell as a martyr."
+    ]},
+    { "id": "spoils", "caption": "", "lines": [
+      { "text": "Soon the lines of Quraysh broke, and they fled, leaving their camp behind.",
+        "say": "Soon the lines of {quraysh} broke, and they fled, leaving their camp behind." },
+      "On the hill, the archers saw the spoils of war in the valley below. The victory is won, some cried.",
+      { "text": "Abdullah ibn Jubayr reminded them of the command of the Prophet ﷺ. But about forty of them went down.",
+        "say": "{ibnjubayr} reminded them of the command of the Prophet, {saw}. But about forty of them went down." },
+      "Only around ten remained."
+    ]},
+    { "id": "khalid", "caption": "", "lines": [
+      { "text": "Khalid ibn al-Walid had been waiting for exactly this moment.", "say": "{khalid} had been waiting for exactly this moment." },
+      "His horsemen rode around the hill, overwhelmed the few archers who remained, and struck the Muslims from behind.",
+      { "text": "The fleeing Quraysh turned back. In moments, victory turned into chaos.",
+        "say": "The fleeing {quraysh} turned back. In moments, victory turned into chaos." }
+    ]},
+    { "id": "chaos", "caption": "", "lines": [
+      { "text": "Then a cry spread across the field, that Muhammad ﷺ had been killed.",
+        "say": "Then a cry spread across the field, that {muhammad_saw} had been killed." },
+      { "text": "Many lost heart. But Anas ibn an-Nadr said: What will you do with life after him? Rise, and die for what he died for.",
+        "say": "Many lost heart. But {anas} said: What will you do with life after him? Rise, and die for what he died for." },
+      { "text": "And he said: I can smell the fragrance of Paradise from beyond Uhud. He charged forward, and was martyred.",
+        "say": "And he said: I can smell the fragrance of Paradise from beyond {uhud}. He charged forward, and was martyred." }
+    ]},
+    { "id": "regroup", "caption": "", "lines": [
+      { "text": "In truth, the Prophet ﷺ was alive, though wounded.", "say": "In truth, the Prophet, {saw}, was alive, though wounded." },
+      { "text": "A small band of companions surrounded him, shielding him with their own bodies, among them a woman, Nusaybah bint Ka'b.",
+        "say": "A small band of companions surrounded him, shielding him with their own bodies, among them a woman, {nusaybah}." },
+      { "text": "Slowly they climbed the slopes of Uhud, and the scattered believers gathered around him once more.",
+        "say": "Slowly they climbed the slopes of {uhud}, and the scattered believers gathered around him once more." }
+    ]},
+    { "id": "abusufyan", "caption": "", "lines": [
+      { "text": "From below, Abu Sufyan shouted: Exalted be Hubal!", "say": "From below, {abusufyan} shouted: {ulhubal}! Exalted be Hubal!" },
+      { "text": "The Prophet ﷺ told his companions to answer: Allah is Most High and Most Majestic.",
+        "say": "The Prophet, {saw}, told his companions to answer: Allah is Most High and Most Majestic." },
+      { "text": "Abu Sufyan called: We have al-Uzza, and you have no Uzza.", "say": "{abusufyan} called: We have {uzza}, and you have no {uzza}." },
+      "They answered: Allah is our Protector, and you have no protector.",
+      { "text": "Then the army of Quraysh turned, and went home to Makkah.", "say": "Then the army of {quraysh} turned, and went home to {makkah}." }
+    ]},
+    { "id": "martyrs", "caption": "", "tail": 3.0, "lines": [
+      { "text": "Seventy companions were martyred at Uhud.", "say": "Seventy companions were martyred at {uhud}." },
+      "They were buried where they fell, in the clothes they wore, two and three to a grave.",
+      { "text": "And the Prophet ﷺ said: I will be a witness for these on the Day of Resurrection.",
+        "say": "And the Prophet, {saw}, said: I will be a witness for these on the Day of Resurrection." }
+    ]},
+    { "id": "lesson", "caption": "", "tail": 2.0, "lines": [
+      { "text": "Uhud was not the defeat of a faith. It was a lesson, written in sacrifice.", "say": "{uhud} was not the defeat of a faith. It was a lesson, written in sacrifice." },
+      "Victory comes with obedience, and the love of this world can turn triumph into loss.",
+      "And Allah revealed: Do not weaken, and do not grieve, for you will be superior, if you are true believers.",
+      { "text": "Surah Al 'Imran, 3:139", "say": "Surah Al Imran, verse one hundred and thirty-nine." }
+    ]},
+    { "id": "end", "caption": "", "lead": 0.5, "tail": 8.0, "lines": [] }
+  ]
+}

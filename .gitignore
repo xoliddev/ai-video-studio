@@ -1,0 +1,39 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# dependencies / caches
+node_modules/
+__pycache__/
+*.py[cod]
+cache/
+.cache/
+
+# generated audio (TTS takes, mixes) and video renders
+*.wav
+*.pcm
+*.mp3
+*.m4a
+*.mp4
+!docs/**/*.mp4
+audio/
+audio_raw/
+audio_cleaned_raw/
+audio_uz/*.wav
+voice/
+
+# third-party / generated media that each pipeline expects locally
+music/
+sfx/
+clips/
+refs/
+build/
+preview/
+stills/
+frames/
+cover_frame.png
+*_cover.png
+
+# logs
+*.log

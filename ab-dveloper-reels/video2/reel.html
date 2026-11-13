@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Soxta chek reel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #072940; --orange: #C96D22; --cream: #F2ECE2; --green: #22c55e; --red: #e5484d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--navy); font-family: Inter, sans-serif; color: #111; }
+  .abs { position: absolute; left: 0; top: 0; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(60px); }
+  #b1 { width: 900px; height: 900px; background: radial-gradient(circle, rgba(201,109,34,.55), rgba(201,109,34,0) 70%); }
+  #b2 { width: 1100px; height: 1100px; background: radial-gradient(circle, rgba(40,120,170,.45), rgba(40,120,170,0) 70%); }
+  #b3 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(242,236,226,.18), rgba(242,236,226,0) 70%); }
+  #dots { position: absolute; inset: -40px; background-image: radial-gradient(rgba(242,236,226,.10) 2px, transparent 2.5px); background-size: 46px 46px; }
+  #redwash { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 60%, rgba(229,72,77,.35), rgba(229,72,77,0) 70%); }
+  #caption { position: absolute; left: 60px; right: 60px; top: 112px; height: 170px; z-index: 30; }
+  .chunk { position: absolute; left: 0; right: 0; top: 0; text-align: center; font: 800 64px/1.12 "Plus Jakarta Sans", sans-serif; letter-spacing: -1px; color: #fff; text-shadow: 0 6px 24px rgba(0,0,0,.35); }
+  .chunk span { display: inline-block; margin: 0 9px; }
+  .phone { position: absolute; left: 0; top: 0; width: 720px; height: 1480px; border-radius: 100px; background: linear-gradient(145deg, #1d2530, #07090c); box-shadow: 0 70px 140px rgba(0,0,0,.5), inset 0 0 0 4px #2b3644, inset 0 0 0 10px #0a0d11; transform-origin: 0 0; z-index: 10; }
+  .screen { position: absolute; left: 22px; top: 22px; width: 676px; height: 1436px; border-radius: 80px; overflow: hidden; background: #fff; }
+  .island { position: absolute; left: 50%; top: 40px; width: 200px; height: 58px; margin-left: -100px; border-radius: 30px; background: #000; z-index: 60; }
+  .layer { position: absolute; left: 0; top: 0; width: 676px; height: 1436px; overflow: hidden; }
+  .status { position: absolute; left: 0; top: 0; width: 100%; height: 78px; display: flex; justify-content: space-between; align-items: flex-end; padding: 0 58px 10px; font: 700 26px Inter; z-index: 55; }
+  .status i { font-style: normal; letter-spacing: 2px; font-size: 22px; }
+  .tgbg { background: linear-gradient(170deg, #d9e4c9, #b9cfa6); }
+  .tgbg2 { background: linear-gradient(170deg, #cfdbe6, #b3c6d6); }
+  .tgpat { position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.35) 3px, transparent 3.5px), radial-gradient(rgba(60,90,40,.10) 2px, transparent 2.5px); background-size: 60px 60px, 38px 38px; background-position: 0 0, 19px 19px; }
+  .tghead { position: absolute; top: 0; left: 0; right: 0; height: 190px; background: #fff; display: flex; align-items: flex-end; padding: 0 26px 22px; gap: 18px; box-shadow: 0 2px 10px rgba(0,0,0,.06); z-index: 5; }
+  .tghead .back { font: 400 54px Inter; color: #2f8de4; width: 40px; line-height: 1; margin-bottom: 8px; }
+  .tghead b { display: block; font: 700 31px Inter; } .tghead small { font: 500 23px Inter; color: #8a96a3; }
+  .av { border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font: 800 30px Inter; flex: none; }
+  .tgin { position: absolute; left: 22px; background: #fff; border-radius: 30px; border-bottom-left-radius: 8px; padding: 22px 26px; font: 500 30px/1.4 Inter; box-shadow: 0 2px 2px rgba(0,0,0,.08); max-width: 580px; }
+  .tgout { position: absolute; right: 22px; background: #e1ffc7; border-radius: 30px; border-bottom-right-radius: 8px; padding: 22px 26px; font: 500 30px/1.4 Inter; box-shadow: 0 2px 2px rgba(0,0,0,.08); max-width: 560px; }
+  .ph { padding: 10px; }
+  .tm { display: block; text-align: right; font: 500 20px Inter; color: #8fa08a; margin-top: 4px; }
+  .ibtn { position: absolute; left: 22px; width: 580px; height: 84px; border-radius: 22px; background: rgba(60,90,50,.36); color: #fff; font: 700 30px Inter; display: flex; align-items: center; justify-content: center; }
+  .tginput { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: #fff; display: flex; align-items: center; padding: 0 26px 18px; gap: 18px; font: 500 30px Inter; color: #9aa4ad; }
+  .menu { height: 64px; padding: 0 26px; border-radius: 32px; background: #2f8de4; color: #fff; font: 700 26px Inter; display: flex; align-items: center; gap: 10px; }
+  .typing { position: absolute; left: 22px; width: 120px; height: 70px; border-radius: 34px; background: #fff; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .typing i { width: 13px; height: 13px; border-radius: 50%; background: #9aa4ad; }
+  /* receipt */
+  .rcp { position: relative; width: 600px; background: #fff; border-radius: 34px; padding: 40px 40px 34px; box-shadow: 0 30px 80px rgba(0,0,0,.35); font-family: Inter; overflow: hidden; }
+  .rcp .ok { width: 110px; height: 110px; border-radius: 50%; background: var(--green); margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+  .rcp h5 { margin: 22px 0 6px; text-align: center; font: 700 32px Inter; color: #333; }
+  .rcp .amt { text-align: center; font: 800 66px "Plus Jakarta Sans"; letter-spacing: -1px; padding: 6px 0; border-radius: 18px; position: relative; }
+  .rcp .rw { display: flex; justify-content: space-between; font: 500 27px Inter; color: #555; padding: 14px 16px; border-radius: 14px; position: relative; }
+  .rcp .rw b { color: #111; font-weight: 700; }
+  .rcp hr { border: 0; border-top: 3px dashed #e3e3e8; margin: 18px 0; }
+  .rcp .stamp { position: absolute; right: 34px; bottom: 30px; width: 170px; height: 170px; border-radius: 50%; border: 6px solid rgba(34,160,90,.75); color: rgba(34,160,90,.85); font: 800 24px Inter; display: flex; align-items: center; justify-content: center; text-align: center; transform: rotate(-16deg); line-height: 1.1; }
+  .tick { position: absolute; right: -14px; top: 50%; width: 56px; height: 56px; margin-top: -28px; border-radius: 50%; background: var(--green); color: #fff; font: 800 34px Inter; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(34,197,94,.45); }
+  .fake { position: absolute; left: 50%; top: 46%; padding: 14px 34px; border: 10px solid var(--red); color: var(--red); font: 900 104px "Plus Jakarta Sans"; letter-spacing: 6px; border-radius: 20px; transform: translate(-50%,-50%) rotate(-14deg); background: rgba(255,255,255,.55); }
+  #bigR, #twinR { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; z-index: 22; }
+  .qtag { position: absolute; top: -90px; left: 50%; margin-left: -60px; width: 120px; height: 120px; border-radius: 50%; background: var(--orange); color: #fff; font: 900 80px "Plus Jakarta Sans"; display: flex; align-items: center; justify-content: center; box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+  #lens { position: absolute; left: 0; top: 0; width: 260px; height: 260px; z-index: 24; }
+  #veil { position: absolute; inset: 0; background: #02101b; z-index: 15; }
+  #bank { position: absolute; left: 0; top: 0; width: 700px; padding: 30px 36px; border-radius: 34px; background: #fff; box-shadow: 0 30px 70px rgba(0,0,0,.35); z-index: 23; display: flex; align-items: center; gap: 24px; }
+  #bank .ic { width: 90px; height: 90px; border-radius: 26px; background: #eef3f8; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  #bank small { display: block; font: 600 26px Inter; color: #888; } #bank b { display: block; font: 800 58px "Plus Jakarta Sans"; color: var(--red); }
+  #box { position: absolute; left: 0; top: 0; width: 230px; z-index: 21; text-align: center; }
+  #box .lbl { font: 700 25px Inter; color: var(--cream); margin-top: 8px; white-space: nowrap; }
+  #stop { position: absolute; left: 60px; top: 20px; width: 110px; height: 110px; }
+  /* pay sheet */
+  .sheet { position: absolute; left: 0; top: 520px; width: 676px; height: 916px; background: #fff; border-radius: 44px 44px 0 0; padding: 0 32px; box-shadow: 0 -10px 40px rgba(0,0,0,.12); }
+  .sheet h3 { margin: 0; position: absolute; left: 32px; top: 44px; font: 800 40px "Plus Jakarta Sans"; }
+  .srow { position: absolute; left: 32px; right: 32px; display: flex; align-items: center; justify-content: space-between; font: 600 28px Inter; color: #222; }
+  .srow small { display: block; font: 500 23px Inter; color: #888; }
+  .pay { position: absolute; left: 32px; top: 700px; width: 612px; height: 104px; border-radius: 30px; background: #111; color: #fff; font: 800 32px Inter; display: flex; align-items: center; justify-content: center; }
+  .spin { width: 46px; height: 46px; border-radius: 50%; border: 6px solid rgba(255,255,255,.3); border-top-color: #fff; }
+  #ok { position: absolute; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #okc { width: 220px; height: 220px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; box-shadow: 0 24px 60px rgba(34,197,94,.4); }
+  #ok h2 { font: 800 44px "Plus Jakarta Sans"; margin: 50px 0 10px; } #ok p { font: 500 28px Inter; color: #777; margin: 0; }
+  /* flow diagram */
+  .node { position: absolute; left: 0; top: 0; width: 600px; height: 180px; border-radius: 40px; background: #fff; box-shadow: 0 26px 60px rgba(0,0,0,.35); display: flex; align-items: center; gap: 28px; padding: 0 36px; z-index: 20; }
+  .node .ic { width: 110px; height: 110px; border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 60px; flex: none; }
+  .node b { display: block; font: 800 40px "Plus Jakarta Sans"; } .node small { font: 500 26px Inter; color: #777; }
+  .node .ck { position: absolute; right: 26px; top: 50%; margin-top: -34px; width: 68px; height: 68px; border-radius: 50%; background: var(--green); color: #fff; font: 800 38px Inter; display: flex; align-items: center; justify-content: center; }
+  #wire { position: absolute; left: 0; top: 0; z-index: 19; }
+  #coin { position: absolute; left: 0; top: 0; width: 96px; height: 96px; margin: -48px 0 0 -48px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #e0a12a 70%); border: 5px solid #fff3c4; box-shadow: 0 10px 30px rgba(224,161,42,.55); z-index: 25; display: flex; align-items: center; justify-content: center; font: 900 30px Inter; color: #7a4a00; }
+  #pic { position: absolute; left: 0; top: 0; width: 120px; height: 150px; margin: -75px 0 0 -60px; border-radius: 18px; background: #fff; border: 5px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,.35); z-index: 25; overflow: hidden; }
+  #pic .x { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 900 110px Inter; color: var(--red); }
+  #gain { position: absolute; left: 0; top: 0; z-index: 26; font: 800 46px "Plus Jakarta Sans"; color: var(--green); background: #fff; padding: 10px 24px; border-radius: 24px; box-shadow: 0 16px 40px rgba(0,0,0,.3); }
+  /* admin */
+  .mhead { position: absolute; top: 0; left: 0; right: 0; height: 170px; background: #fff; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 24px; font: 600 28px Inter; color: #2f8de4; z-index: 5; border-bottom: 1px solid #eee; }
+  .mhead b { color: #111; font: 800 32px "Plus Jakarta Sans"; }
+  .sec { position: absolute; left: 30px; font: 800 28px Inter; color: #555; letter-spacing: 1px; }
+  .oc { position: absolute; left: 24px; width: 628px; height: 150px; border-radius: 28px; background: #fff; box-shadow: 0 6px 20px rgba(0,0,0,.08); display: flex; align-items: center; gap: 22px; padding: 0 26px; border: 3px solid transparent; }
+  .oc .th { width: 96px; height: 106px; border-radius: 20px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .oc .th svg { width: 78px; height: 94px; }
+  .oc b { display: block; font: 700 29px Inter; } .oc small { font: 500 24px Inter; color: #888; }
+  .oc .st { margin-left: auto; padding: 10px 18px; border-radius: 18px; font: 700 23px Inter; white-space: nowrap; }
+  #aban { position: absolute; left: 18px; top: 18px; width: 640px; height: 112px; border-radius: 34px; background: rgba(246,246,248,.98); box-shadow: 0 16px 40px rgba(0,0,0,.2); display: flex; align-items: center; gap: 18px; padding: 0 24px; z-index: 70; }
+  #aban .app { width: 64px; height: 64px; border-radius: 18px; background: var(--green); display: flex; align-items: center; justify-content: center; color: #fff; font: 800 34px Inter; flex: none; }
+  #finger { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 40; }
+  #fdot { position: absolute; left: -38px; top: -38px; width: 76px; height: 76px; border-radius: 50%; background: rgba(255,255,255,.55); border: 4px solid rgba(255,255,255,.9); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  #fring { position: absolute; left: -38px; top: -38px; width: 76px; height: 76px; border-radius: 50%; border: 5px solid rgba(255,255,255,.9); }
+  #wipe { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+  .band { position: absolute; left: -600px; width: 2400px; height: 1300px; }
+  #logo { position: absolute; left: 0; right: 0; top: 480px; display: flex; flex-direction: column; align-items: center; z-index: 25; }
+  #logo svg { width: 560px; height: 560px; }
+  #wordmark { font: 800 96px "Plus Jakarta Sans"; letter-spacing: -2px; color: var(--cream); margin-top: -40px; }
+  #wordmark i { color: var(--orange); font-style: normal; margin: 0 -.07em; }
+  #teaser { margin-top: 46px; font: 700 34px Inter; color: var(--navy); background: var(--cream); padding: 18px 34px; border-radius: 40px; }
+  #grain { position: absolute; inset: -100px; z-index: 90; opacity: .07; pointer-events: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  #vig { position: absolute; inset: 0; z-index: 89; pointer-events: none; background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.45) 100%); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"><div id="dots"></div><div class="blob" id="b1"></div><div class="blob" id="b2"></div><div class="blob" id="b3"></div><div id="redwash"></div></div>
+  <div id="caption"></div>
+
+  <div id="phoneA" class="phone"><div class="screen">
+    <div class="status"><span>14:53</span><i>●●● ▮</i></div>
+    <!-- seller's chat with a customer -->
+    <div class="layer tgbg" id="sChat"><div class="tgpat"></div>
+      <div class="tghead"><div class="back">‹</div><div class="av" style="width:84px;height:84px;background:#3d8bfd">J</div><div><b>Jasur</b><small>onlayn</small></div></div>
+      <div class="tgin ph" id="sPhoto" style="top:230px;width:420px"><div id="sPhotoR" style="width:400px;height:560px;overflow:hidden;border-radius:22px;background:#f4f4f6"></div></div>
+      <div class="tgin" id="sText" style="top:830px">To'ladim, jo'natib yuboring! 🙏<span class="tm">14:52</span></div>
+      <div class="tginput"><div class="menu">☰ Panel</div>Xabar</div>
+    </div>
+    <!-- customer pays inside the bot -->
+    <div class="layer tgbg" id="pay"><div class="tgpat"></div>
+      <div class="tghead"><div class="back">‹</div><div class="av" style="width:84px;height:84px;background:linear-gradient(135deg,#C96D22,#E08A3E)">L</div><div><b>LIBOS</b><small>bot</small></div></div>
+      <div class="tgin" style="top:230px">Buyurtmangiz tayyor ✅<br>To'lovni shu yerning o'zida qiling.<span class="tm">14:55</span></div>
+      <div class="sheet"><h3>Buyurtma #2087</h3>
+        <div class="srow" style="top:130px"><div>Denim kurtka · M<small>1 dona</small></div><span>349 000</span></div>
+        <div class="srow" style="top:230px"><div>Yetkazib berish<small>Ertaga, 10:00–14:00</small></div><span>40 000</span></div>
+        <div class="srow" style="top:330px"><div>💳 Karta •••• 4521<small>To'lov bot ichida</small></div><span></span></div>
+        <div class="srow" style="top:440px;font:800 34px Inter"><span>Jami</span><span>389 000 so'm</span></div>
+        <div class="pay" id="payb"><span id="payTxt">To'lash · 389 000 so'm</span><div class="spin" id="spin"></div></div>
+      </div>
+      <div id="ok"><div id="okc"><svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path id="okPath" d="M5 12.5l4.5 4.5L19 7.5" stroke-dasharray="22" stroke-dashoffset="22"/></svg></div>
+        <h2>To'lov qabul qilindi</h2><p>389 000 so'm · Buyurtma #2087</p></div>
+    </div>
+    <!-- customer tries a screenshot, the bot answers -->
+    <div class="layer tgbg" id="bChat"><div class="tgpat"></div>
+      <div class="tghead"><div class="back">‹</div><div class="av" style="width:84px;height:84px;background:linear-gradient(135deg,#C96D22,#E08A3E)">L</div><div><b>LIBOS</b><small>bot</small></div></div>
+      <div class="tgout ph" id="bPhoto" style="top:230px;width:300px"><div id="bPhotoR" style="width:280px;height:392px;overflow:hidden;border-radius:20px;background:#f4f4f6"></div></div>
+      <div class="typing" id="bTyping" style="top:680px"><i></i><i></i><i></i></div>
+      <div class="tgin" id="bReply" style="top:680px">Rahmat! 🙂 Lekin chek rasmi emas, to'lovning o'zi kerak. Pastdagi tugma orqali bir zumda to'lashingiz mumkin.<span class="tm">14:58</span></div>
+      <div class="ibtn" id="bBtn" style="top:960px">💳&nbsp; To'lash · 389 000 so'm</div>
+      <div class="tginput"><div class="menu">☰ Do'kon</div>Xabar</div>
+    </div>
+  </div><div class="island"></div></div>
+
+  <div id="phoneB" class="phone"><div class="screen">
+    <div class="status"><span>15:02</span><i>●●● ▮</i></div>
+    <div class="layer" id="adm" style="background:#f4f5f7">
+      <div class="mhead"><span>✕ Yopish</span><b>Buyurtmalar</b><span>⋯</span></div>
+      <div class="sec" style="top:200px">✅ YIG'ISHGA · TO'LANGAN</div>
+      <div class="sec" style="top:470px">⏳ KUTILMOQDA</div>
+      <div id="ocards"></div>
+    </div>
+    <div id="aban"><div class="app">✓</div><div><b style="font:700 25px Inter;display:block">LIBOS · Admin</b><span style="font:500 25px Inter;color:#333">To'lov tushdi: 389 000 so'm · #2087</span></div></div>
+  </div><div class="island"></div></div>
+
+  <div id="veil"></div>
+  <div id="box"><svg width="230" height="200" viewBox="0 0 230 200">
+      <path d="M115 20 L210 60 L210 160 L115 196 L20 160 L20 60 Z" fill="#C96D22"/>
+      <path d="M115 20 L210 60 L115 100 L20 60 Z" fill="#E08A3E"/><path d="M115 100 L115 196 L20 160 L20 60 Z" fill="#a85818"/>
+      <path d="M68 40 L162 80 L162 112" stroke="#F2ECE2" stroke-width="12" fill="none"/></svg>
+    <svg id="stop" viewBox="0 0 100 100"><polygon points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30" fill="#e5484d" stroke="#fff" stroke-width="5"/><text x="50" y="62" text-anchor="middle" font-family="Inter" font-weight="900" font-size="28" fill="#fff">STOP</text></svg>
+    <div class="lbl">Jo'natishga tayyor</div></div>
+  <div id="bigR"></div>
+  <div id="twinR"></div>
+  <svg id="lens" viewBox="0 0 260 260"><circle cx="110" cy="110" r="84" fill="rgba(255,255,255,.16)" stroke="#F2ECE2" stroke-width="16"/><line x1="172" y1="172" x2="244" y2="244" stroke="#F2ECE2" stroke-width="26" stroke-linecap="round"/></svg>
+  <div id="bank"><div class="ic">🏦</div><div><small>Hisob · bugungi kirim</small><b>0 so'm</b></div></div>
+
+  <svg id="wire" width="1080" height="1920"></svg>
+  <div class="node" id="n0"><div class="ic" style="background:#eef3ff">👤</div><div><b>Mijoz</b><small>bot ichida to'laydi</small></div><div class="ck">✓</div></div>
+  <div class="node" id="n1"><div class="ic" style="background:#fff4e6">🏦</div><div><b>To'lov tizimi</b><small>pulni qabul qiladi</small></div><div class="ck">✓</div></div>
+  <div class="node" id="n2"><div class="ic" style="background:#fdf0e6">🤖</div><div><b>LIBOS bot</b><small>tasdiqni tekshiradi</small></div><div class="ck">✓</div></div>
+  <div class="node" id="n3"><div class="ic" style="background:#eaf7ee">🧑‍💼</div><div><b>Sotuvchi</b><small>tayyor buyurtma oladi</small></div><div class="ck">✓</div></div>
+  <div id="coin">so'm</div>
+  <div id="pic"><div id="picR" style="transform:scale(.2);transform-origin:0 0;width:600px"></div><div class="x">✕</div></div>
+  <div id="gain">+389 000 so'm</div>
+
+  <div id="finger"><div id="fring"></div><div id="fdot"></div></div>
+  <div id="logo"><svg viewBox="0 0 1000 1000"><g transform="translate(-2 9)">
+      <circle id="ra" cx="330" cy="600" r="140" fill="none" stroke="#F2ECE2" stroke-width="64" stroke-dasharray="880" transform="rotate(-90 330 600)"/>
+      <circle id="rb" cx="674" cy="600" r="140" fill="none" stroke="#C96D22" stroke-width="64" stroke-dasharray="880" transform="rotate(90 674 600)"/>
+      <rect id="sa" x="438" y="428" width="64" height="344" fill="#F2ECE2"/><rect id="sb" x="502" y="210" width="64" height="562" fill="#C96D22"/></g></svg>
+    <div id="wordmark">ab<i>.</i>dveloper</div><div id="teaser">Keyingisi: kechasi ham sotadigan AI 🌙</div></div>
+  <div id="wipe"><div class="band" id="bandO" style="background:var(--orange)"></div><div class="band" id="bandC" style="background:var(--cream)"></div></div>
+  <div id="vig"></div><div id="grain"></div>
+</div>
+
+<script src="timeline.js"></script>
+<script src="garments.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+const lerp = (a, b, k) => a + (b - a) * k;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const win = (t, a, b, f = .2) => P(t, a, a + f) * (1 - P(t, b - f, b));
+function tf(el, o = {}) {
+  const { x = 0, y = 0, s = 1, r = 0 } = o;
+  el.style.transform = `translate(${x}px,${y}px) rotate(${r}deg) scale(${o.sx ?? s},${o.sy ?? s})`;
+  if (o.o !== undefined) el.style.opacity = o.o;
+}
+// display, not visibility: a visible child would still show inside a hidden parent
+const vis = (el, v) => { el.style.display = v ? '' : 'none'; };
+
+// ---------- narration words & captions (same system as video 1) ----------
+const LINES = TL.lines;
+const WORDS = LINES.map(l => {
+  const toks = l.text.split(' ');
+  const w = toks.map(tk => {
+    let k = tk.replace(/[^A-Za-z0-9'ʻ’]/g, '').length + 1.4;
+    if (/[,]$/.test(tk)) k += 2.2;
+    if (/[.!?…»]$/.test(tk)) k += 3;
+    if (tk === '—') k = 2.2;
+    return k;
+  });
+  const sum = w.reduce((a, b) => a + b, 0), dur = l.b - l.a;
+  let acc = 0;
+  return toks.map((tk, i) => { const a = l.a + dur * acc / sum; acc += w[i]; return { tk, a, b: l.a + dur * acc / sum }; });
+});
+const wordTime = (li, needle) => { const w = WORDS[li].find(w => w.tk.toLowerCase().includes(needle.toLowerCase())); return w ? w.a : LINES[li].a; };
+const CHUNKS = [];
+WORDS.forEach((ws, li) => {
+  let cur = [];
+  const flush = () => { if (cur.length) CHUNKS.push({ li, words: cur }); cur = []; };
+  ws.forEach(w => {
+    if (w.tk === '—') return;
+    const lim = /[,.!?:»]$/.test(w.tk) ? 36 : 24;   // a short closing word may wrap to a 2nd line rather than stand alone
+    if (cur.length && [...cur, w].map(x => x.tk).join(' ').length > lim) flush();
+    cur.push(w);
+    if (/[,.!?:»]$/.test(w.tk)) flush();
+  });
+  flush();
+});
+CHUNKS.forEach(c => { c.a = c.words[0].a - .06; });
+CHUNKS.forEach((c, i) => {
+  const nx = CHUNKS[i + 1];
+  c.b = nx && nx.li === c.li ? nx.a : LINES[c.li].b + .3;
+  const el = document.createElement('div'); el.className = 'chunk';
+  el.innerHTML = c.words.map(w => `<span>${w.tk}</span>`).join(' ');
+  $('caption').appendChild(el); c.el = el; c.spans = [...el.children];
+});
+function captions(t, hidden) {
+  CHUNKS.forEach(c => {
+    const on = !hidden && t >= c.a && t < c.b;
+    vis(c.el, on);
+    if (!on) return;
+    const k = P(t, c.a, c.a + .12);
+    tf(c.el, { y: (1 - eo(k)) * 26, o: k });
+    c.words.forEach((w, i) => {
+      const sp = c.spans[i], said = t >= w.a, now = t >= w.a && t < w.b;
+      sp.style.color = now ? '#F0A060' : '#fff';
+      sp.style.opacity = said ? 1 : .38;
+      sp.style.transform = `scale(${said ? lerp(1.12, 1, eo(P(t, w.a, w.a + .14))) : 1})`;
+    });
+  });
+}
+
+// ---------- static content ----------
+const G = GARMENTS;
+function receipt(id) {
+  return `<div class="rcp">
+    <div class="ok"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h5>To'lov muvaffaqiyatli</h5>
+    <div class="amt" id="${id}amt">389 000 so'm</div>
+    <hr>
+    <div class="rw" id="${id}date"><span>Sana</span><b>30.10.2026 · 14:52</b></div>
+    <div class="rw"><span>Qabul qiluvchi</span><b>LIBOS</b></div>
+    <div class="rw"><span>Karta</span><b>•••• 7731</b></div>
+    <div class="rw"><span>Tranzaksiya</span><b>884 129 007</b></div>
+    <div style="height:150px"></div>
+    <div class="stamp" id="${id}stamp">O'TKAZILDI<br>✓</div>
+  </div>`;
+}
+$('bigR').innerHTML = receipt('r') + '<div class="fake" id="fake">SOXTA</div><div class="qtag" id="qL">?</div>';
+$('twinR').innerHTML = receipt('t') + '<div class="qtag" id="qR">?</div>';
+['sPhotoR', 'bPhotoR', 'picR'].forEach((id, i) => { $(id).innerHTML = `<div style="transform:scale(${[.666, .466, 1][i]});transform-origin:0 0;width:600px">${receipt('m' + i)}</div>`; });
+$('picR').style.transform = 'scale(.2)';
+const ORDERS = [
+  { n: '#2087 · Jasur', d: 'Denim kurtka · M', p: "389 000 so'm", g: 'jacket', c: '#4f78a8', bg: '#e7eef6' },
+  { n: '#2088 · Dilshod', d: 'Xudi · L', p: "229 000 so'm", g: 'hoodie', c: '#6E7C4A', bg: '#eef0e5' },
+  { n: '#2089 · Malika', d: "Shoyi ko'ylak · S", p: "269 000 so'm", g: 'dress', c: '#b85c6e', bg: '#f7eaee' },
+];
+$('ocards').innerHTML = ORDERS.map((o, i) => `<div class="oc" id="oc${i}"><div class="th" style="background:${o.bg}">${G[o.g](o.c)}</div><div><b>${o.n}</b><small>${o.d} · ${o.p}</small></div><div class="st" id="st${i}"></div></div>`).join('');
+
+// ---------- layout & anchors ----------
+const PH = { x: 223, y: 300, s: .88 };
+const S2 = (x, y) => [PH.x + (22 + x) * PH.s, PH.y + (22 + y) * PH.s];
+const L = i => LINES[i].a, E = i => LINES[i].b;
+const T = {
+  tolad: wordTime(0, "To'ladim"), summa: wordTime(1, 'Summa'), sana: wordTime(1, 'sana'), belgi: wordTime(1, 'belgisi'),
+  faqat: wordTime(2, 'faqat'), tush: wordTime(2, 'tushmagan'), ajrat: wordTime(3, 'ajratish'),
+  turn: L(4), rasm6: wordTime(6, 'rasmdan'), ozidan: wordTime(6, "o'zidan"),
+  rasm7: wordTime(7, 'rasm'), mul: wordTime(7, 'muloyimgina'), tug: wordTime(7, 'tugmasini'),
+  puli: wordTime(8, 'puli'), qol: wordTime(8, 'Qolgani'), keying: wordTime(9, 'Keyingisida'),
+};
+const WIPE = [T.turn - .2, T.turn + .55], TG0 = T.turn + .2;
+const PAYTAP = L(5) + 1.15, OKT = PAYTAP + .4;
+const FLOW0 = L(6) - .15, FLOW1 = L(7) - .05;
+const SWAP = L(8) - .05, OUT = L(9);
+const NODE_Y = [470, 800, 1130, 1460], NODE_X = 240;
+
+// ---------- sound cues ----------
+const SFX = [];
+const sfx = (t, id, g = 1, dur = 0, pan = 0) => SFX.push({ t: +t.toFixed(3), id: String(id), g, dur, pan });
+sfx(L(0) + .1, 2356, .6, .8); sfx(T.tolad - .05, 2357, .5, .8); sfx(T.tolad + .5, 2925, .35, .6);
+sfx(L(1) - .05, 3005, .5, .8); sfx(T.summa, 2867, .45, .8); sfx(T.sana, 2867, .45, .8); sfx(T.belgi, 2867, .5, .8);
+sfx(T.faqat - .1, 166, .4, .6); sfx(T.faqat + .25, 2575, .55, .8); sfx(T.tush, 2364, .8, .6); sfx(T.tush + .02, 3005, .45, .8); sfx(T.tush + .3, 2575, .35, .6);
+sfx(L(3) + .1, 166, .35, .6); sfx(L(3) + .5, 2925, .3, .5); sfx(L(3) + .7, 2925, .3, .5); sfx(T.ajrat - .1, 166, .3, .8);
+sfx(WIPE[0], 1492, .8, 1.2);
+sfx(PAYTAP, 1109, .6, .4); sfx(OKT + .02, 2865, .8, 1.2); sfx(OKT + .1, 871, .4, 1.2);
+sfx(FLOW0 + .15, 2364, .35, .4); sfx(FLOW0 + .35, 2364, .35, .4); sfx(FLOW0 + .55, 2364, .35, .4); sfx(FLOW0 + .75, 2364, .35, .4);
+sfx(T.rasm6 + .55, 2575, .5, .7); sfx(T.ozidan - .1, 3005, .4, .8); sfx(T.ozidan + .45, 2867, .55, .8); sfx(T.ozidan + 1.05, 1993, .35, .8);
+sfx(T.rasm7 + .05, 2356, .5, .8); sfx(T.mul - .1, 2357, .55, .8); sfx(T.tug, 2925, .4, .5);
+sfx(SWAP, 1492, .45, 1.2); sfx(T.puli - .2, 951, .45, 1.3); sfx(T.puli + .1, 166, .4, .6); sfx(T.puli + .4, 1992, .4, 1.2); sfx(T.qol, 2585, .3, .4);
+sfx(OUT - .05, 2608, .6, 1.2); sfx(OUT + .55, 3120, .6, 1.2); sfx(OUT + 1.6, 871, .5, 1.5); sfx(T.keying, 2925, .4, .6);
+
+// ---------- scenes ----------
+function bg(t) {
+  tf($('b1'), { x: -250 + Math.sin(t * .23) * 120, y: -200 + Math.cos(t * .19) * 90 });
+  tf($('b2'), { x: 380 + Math.cos(t * .17) * 140, y: 1150 + Math.sin(t * .21) * 120 });
+  tf($('b3'), { x: 600 + Math.sin(t * .29) * 160, y: 400 + Math.cos(t * .25) * 160 });
+  tf($('dots'), { x: -(t * 6) % 46, y: -(t * 4) % 46 });
+  $('redwash').style.opacity = win(t, T.faqat, T.turn - .1, .4);
+}
+
+function phoneA(t) {
+  const el = $('phoneA');
+  let x = PH.x, y = PH.y + Math.sin(t * 1.3) * 6, r = Math.sin(t * .9) * .6, s = PH.s, o = 1;
+  // away while the flow diagram plays, and for good at the seller swap
+  const away = eio(P(t, FLOW0, FLOW0 + .45)) * (1 - eio(P(t, FLOW1, FLOW1 + .45)));
+  const sw = eio(P(t, SWAP, SWAP + .6));
+  x += lerp(0, -900, Math.max(away, sw)); r += lerp(0, -12, Math.max(away, sw));
+  o = 1 - Math.max(P(t, FLOW0 + .2, FLOW0 + .45) * (1 - P(t, FLOW1, FLOW1 + .2)), P(t, SWAP + .3, SWAP + .6));
+  tf(el, { x, y, r, s, o }); vis(el, o > 0);
+  vis($('sChat'), t < TG0); vis($('pay'), t >= TG0 && t < FLOW0 + .5); vis($('bChat'), t >= FLOW1 - .1);
+  if (t < TG0) sellerChat(t);
+  else if (t < FLOW0 + .5) payScreen(t);
+  else botChat(t);
+}
+
+function sellerChat(t) {
+  tf($('sPhoto'), { s: back(P(t, L(0) + .1, L(0) + .4)), o: P(t, L(0) + .1, L(0) + .2) }); $('sPhoto').style.transformOrigin = '0 100%';
+  tf($('sText'), { s: back(P(t, T.tolad - .05, T.tolad + .25)), o: P(t, T.tolad - .05, T.tolad + .05) }); $('sText').style.transformOrigin = '0 100%';
+}
+
+function payScreen(t) {
+  const paying = t > PAYTAP && t < OKT;
+  vis($('spin'), paying); vis($('payTxt'), !paying);
+  $('spin').style.transform = `rotate(${t * 900}deg)`;
+  $('payb').style.filter = t > PAYTAP && t < PAYTAP + .15 ? 'brightness(1.4)' : 'none';
+  const ok = P(t, OKT, OKT + .3);
+  vis($('ok'), ok > 0); $('ok').style.opacity = ok;
+  tf($('okc'), { s: back(P(t, OKT + .05, OKT + .4)) });
+  $('okPath').setAttribute('stroke-dashoffset', 22 * (1 - eo(P(t, OKT + .25, OKT + .55))));
+}
+
+function botChat(t) {
+  tf($('bPhoto'), { s: back(P(t, T.rasm7 + .05, T.rasm7 + .35)), o: P(t, T.rasm7 + .05, T.rasm7 + .15) }); $('bPhoto').style.transformOrigin = '100% 100%';
+  vis($('bTyping'), t > T.rasm7 + .5 && t < T.mul - .1);
+  $('bTyping').querySelectorAll('i').forEach((d, j) => { d.style.transform = `translateY(${Math.sin(t * 12 - j) * 6}px)`; });
+  vis($('bReply'), t >= T.mul - .1);
+  tf($('bReply'), { s: back(P(t, T.mul - .1, T.mul + .2)) }); $('bReply').style.transformOrigin = '0 100%';
+  tf($('bBtn'), { y: (1 - eo(P(t, T.tug, T.tug + .3))) * 30, o: P(t, T.tug, T.tug + .2) });
+  $('bBtn').style.boxShadow = t > T.tug + .3 ? `0 0 0 ${6 + Math.sin(t * 6) * 4}px rgba(201,109,34,.45)` : 'none';
+}
+
+function receiptScenes(t) {
+  // the photo lifts out of the chat and grows in front of the dimmed phone
+  const up = eo(P(t, L(1) - .1, L(1) + .45));
+  const toTwin = eio(P(t, L(3) - .05, L(3) + .5));
+  const gone = P(t, T.turn - .35, T.turn - .05);
+  const on = up > 0 && gone < 1;
+  vis($('bigR'), on);
+  const [px, py] = S2(30, 230);
+  const cx = 240, cy = 560;                    // receipt card is 600 wide; centred position
+  const x = lerp(lerp(px - 100, cx, up), 40, toTwin), y = lerp(lerp(py - 140, cy, up), 640, toTwin);
+  const s = lerp(lerp(.66, 1, up), .78, toTwin) * (1 + .03 * Math.sin(t * 2));
+  tf($('bigR'), { x, y, s, r: lerp(-4, -3, toTwin), o: 1 - gone });
+  $('veil').style.opacity = .55 * Math.min(up, 1 - P(t, T.turn - .3, T.turn));
+  vis($('veil'), up > 0 && t < T.turn);
+  // green checks on amount, date, stamp
+  [['ramt', T.summa], ['rdate', T.sana], ['rstamp', T.belgi]].forEach(([id, at]) => {
+    const el = $(id), k = P(t, at - .05, at + .25);
+    let tk = el.querySelector('.tick');
+    if (!tk) { tk = document.createElement('div'); tk.className = 'tick'; tk.textContent = '✓'; el.appendChild(tk); }
+    vis(tk, k > 0 && t < T.faqat + .3); tf(tk, { s: back(k) });
+    if (id !== 'rstamp') el.style.background = k > 0 && t < T.faqat + .3 ? `rgba(34,197,94,${.14 * k})` : 'transparent';
+    else tf(el, { r: -16, s: 1 + .12 * win(t, at, at + .4, .15) });
+  });
+  // SOXTA stamp slams down, then lifts off for the comparison
+  const f = P(t, T.tush - .05, T.tush + .12);
+  vis($('fake'), f > 0 && toTwin < 1);
+  $('fake').style.transform = `translate(-50%,-50%) rotate(-14deg) scale(${lerp(2.4, 1, f * f)})`;
+  $('fake').style.opacity = f * (1 - toTwin);
+  // bank balance: zero
+  const bk = win(t, T.faqat - .1, L(3) - .05, .3);
+  vis($('bank'), bk > 0);
+  tf($('bank'), { x: 190 + (t > T.faqat + .25 && t < T.faqat + .7 ? Math.sin((t - T.faqat) * 60) * 10 : 0), y: lerp(1900, 1450, eo(bk)), o: bk });
+  // twin receipts + magnifier
+  vis($('twinR'), toTwin > 0 && gone < 1);
+  tf($('twinR'), { x: lerp(1100, 450, toTwin), y: 640, s: .78 * (1 + .03 * Math.sin(t * 2 + 1)), r: 3, o: 1 - gone });
+  ['qL', 'qR'].forEach((id, i) => { vis($(id), toTwin > .5); tf($(id), { y: Math.sin(t * 5 + i * 2) * 10, s: back(P(t, L(3) + .45 + i * .2, L(3) + .75 + i * .2)) }); });
+  const ln = P(t, L(3) + .3, T.turn - .4);
+  vis($('lens'), ln > 0 && ln < 1);
+  tf($('lens'), { x: lerp(60, 760, eio(ln)), y: 900 + Math.sin(ln * Math.PI * 2) * 120, r: -10 + ln * 20 });
+  // the parcel waits, then gets stopped
+  const bx = win(t, T.tolad + .5, T.turn - .1, .3);
+  vis($('box'), bx > 0);
+  tf($('box'), { x: 838, y: 1180 + Math.sin(t * 2.2) * 8, s: lerp(.6, .9, back(P(t, T.tolad + .5, T.tolad + .8))), o: bx * (toTwin > .3 ? 1 - toTwin : 1) });
+  const st = P(t, T.tush + .3, T.tush + .5);
+  vis($('stop'), st > 0); tf($('stop'), { s: back(st) });
+}
+
+function flow(t) {
+  const on = win(t, FLOW0, FLOW1 + .2, .3);
+  ['n0', 'n1', 'n2', 'n3'].forEach((id, i) => {
+    const k = P(t, FLOW0 + .1 + i * .2, FLOW0 + .4 + i * .2);
+    vis($(id), on > 0 && k > 0);
+    tf($(id), { x: NODE_X, y: NODE_Y[i] - 90 + (1 - eo(k)) * 40, s: lerp(.85, 1, back(k)), o: on * k });
+  });
+  // wires
+  const cx = NODE_X + 300;
+  vis($('wire'), on > 0);
+  $('wire').style.opacity = on;
+  const dash = -(t * 60) % 40;
+  $('wire').innerHTML = [0, 1, 2].map(i => `<line x1="${cx}" y1="${NODE_Y[i] + 90}" x2="${cx}" y2="${NODE_Y[i + 1] - 90}" stroke="#F2ECE2" stroke-width="8" stroke-dasharray="18 22" stroke-dashoffset="${dash}" opacity="${P(t, FLOW0 + .3 + i * .2, FLOW0 + .6 + i * .2)}"/>`).join('') +
+    `<path d="M${NODE_X + 600} ${NODE_Y[0]} C 1070 ${NODE_Y[0]}, 1070 ${NODE_Y[2]}, ${NODE_X + 600} ${NODE_Y[2]}" stroke="rgba(229,72,77,.7)" stroke-width="7" stroke-dasharray="12 16" fill="none" opacity="${win(t, T.rasm6 - .2, T.rasm6 + 1.2, .2)}"/>`;
+  // coin: client -> payment system, then -> bot -> seller
+  const seg = (a, i) => { const k = eio(P(t, a, a + .55)); return [cx, lerp(NODE_Y[i], NODE_Y[i + 1], k), k]; };
+  const s0 = FLOW0 + .95, s1 = T.ozidan - .1, s2 = T.ozidan + .55;
+  let cp = null;
+  if (t >= s0 && t < s1) cp = seg(s0, 0);
+  if (t >= s1 && t < s2) cp = seg(s1, 1);
+  if (t >= s2) cp = seg(s2, 2);
+  vis($('coin'), on > 0 && cp && t > s0);
+  if (cp) tf($('coin'), { x: cp[0], y: cp[1], s: 1 + .1 * Math.sin(t * 10), o: on });
+  // a screenshot tries the side road and is blocked
+  const pk = P(t, T.rasm6 - .1, T.rasm6 + .5);
+  vis($('pic'), on > 0 && pk > 0 && t < T.rasm6 + 1.2);
+  const bez = k => { const u = 1 - k; return [u * u * u * (NODE_X + 600) + 3 * u * u * k * 1070 + 3 * u * k * k * 1070 + k * k * k * (NODE_X + 600), u * u * u * NODE_Y[0] + 3 * u * u * k * NODE_Y[0] + 3 * u * k * k * NODE_Y[2] + k * k * k * NODE_Y[2]]; };
+  const [qx, qy] = bez(.5 * eo(pk));
+  tf($('pic'), { x: qx, y: qy, r: 8, o: on * (1 - P(t, T.rasm6 + .9, T.rasm6 + 1.2)), s: 1 + .2 * win(t, T.rasm6 + .5, T.rasm6 + .9, .1) });
+  $('pic').querySelector('.x').style.opacity = P(t, T.rasm6 + .5, T.rasm6 + .6);
+  // checks + gain
+  [[1, s1], [2, s2], [3, s2 + .55]].forEach(([i, at]) => { const ck = $('n' + i).querySelector('.ck'); const k = P(t, at, at + .25); vis(ck, k > 0); tf(ck, { s: back(k) }); });
+  vis($('n0').querySelector('.ck'), false);
+  const g = win(t, s2 + .55, FLOW1 + .2, .25);
+  vis($('gain'), g > 0 && on > 0); tf($('gain'), { x: NODE_X + 330, y: NODE_Y[3] - 170 - eo(g) * 30, o: g * on });
+}
+
+function seller(t) {
+  const el = $('phoneB');
+  const k = eio(P(t, SWAP + .05, SWAP + .65)), out = eio(P(t, OUT - .05, OUT + .5));
+  vis(el, k > 0 && out < 1);
+  tf(el, { x: PH.x + lerp(820, 0, k), y: PH.y + Math.sin(t * 1.3) * 6 + lerp(0, -1700, out), r: lerp(14, 0, k) + out * 10, s: PH.s });
+  const ab = win(t, T.puli - .2, T.puli + 1.6, .25);
+  vis($('aban'), ab > 0); tf($('aban'), { y: lerp(-160, 60, eo(Math.min(1, ab * 1.3))), o: ab });
+  // order cards: all waiting, then #2087 moves up to "paid", the rest shuffle up
+  const mv = eio(P(t, T.puli + .1, T.puli + .7));
+  const ys = [lerp(520, 250, mv), lerp(690, 520, mv), lerp(860, 690, mv)];
+  ORDERS.forEach((o, i) => {
+    const c = $('oc' + i), app = P(t, SWAP + .5 + i * .12, SWAP + .8 + i * .12);
+    vis(c, app > 0);
+    tf(c, { y: ys[i] + (1 - eo(app)) * 40, o: app, s: i === 0 ? 1 + .04 * win(t, T.puli + .1, T.puli + .9, .3) : 1 });
+    const paid = i === 0 && mv > .5;
+    c.style.borderColor = paid ? 'rgba(34,197,94,.8)' : 'transparent';
+    const st = $('st' + i);
+    st.textContent = paid ? "To'langan ✓" : 'Kutilmoqda';
+    st.style.background = paid ? 'rgba(34,197,94,.15)' : '#f0f0f3';
+    st.style.color = paid ? '#15803d' : '#888';
+    if (i > 0) tf(st, { s: 1 + .08 * win(t, T.qol + (i - 1) * .2, T.qol + .5 + (i - 1) * .2, .2) });
+  });
+}
+
+function finger(t) {
+  const K = [[L(5) + .2, 470, 1150], [PAYTAP - .3, 338, 1272], [PAYTAP + .35, 338, 1272]];
+  const on = win(t, K[0][0], OKT + .1, .25);
+  vis($('finger'), on > 0); if (on <= 0) return;
+  let x = K[0][1], y = K[0][2];
+  for (let i = 0; i < K.length - 1; i++) {
+    if (t >= K[i][0] && t <= K[i + 1][0]) { const k = eio(P(t, K[i][0], K[i + 1][0])); x = lerp(K[i][1], K[i + 1][1], k); y = lerp(K[i][2], K[i + 1][2], k); }
+    if (t > K[i + 1][0]) { x = K[i + 1][1]; y = K[i + 1][2]; }
+  }
+  const [sx, sy] = S2(x, y);
+  $('finger').style.opacity = on; tf($('finger'), { x: sx, y: sy });
+  tf($('fdot'), { s: t >= PAYTAP - .06 && t < PAYTAP + .12 ? .78 : 1 });
+  const tp = t >= PAYTAP && t < PAYTAP + .45;
+  vis($('fring'), tp); if (tp) { const k = P(t, PAYTAP, PAYTAP + .45); tf($('fring'), { s: lerp(.6, 2.4, eo(k)), o: .8 * (1 - k) }); }
+}
+
+function wipe(t) {
+  const k = P(t, WIPE[0], WIPE[1]);
+  vis($('wipe'), k > 0 && k < 1);
+  tf($('bandO'), { x: lerp(-2600, 2600, eio(k)), y: 100, r: -24 });
+  tf($('bandC'), { x: lerp(-2600, 2600, eio(P(k, .08, 1))), y: 700, r: -24 });
+}
+
+function outro(t) {
+  vis($('logo'), t > OUT + .4);
+  tf($('logo'), { y: Math.sin(t * 1.2) * 6, s: lerp(1, 1.04, P(t, OUT + 2, TL.duration)) });
+  const sb = eo(P(t, OUT + .5, OUT + .85)), sa = eo(P(t, OUT + .65, OUT + .95));
+  $('sb').setAttribute('transform', `translate(0 ${lerp(-700, 0, sb)})`);
+  $('sa').setAttribute('transform', `translate(0 ${lerp(700, 0, sa)})`);
+  $('ra').setAttribute('stroke-dashoffset', 880 * (1 - eio(P(t, OUT + .85, OUT + 1.45))));
+  $('rb').setAttribute('stroke-dashoffset', 880 * (1 - eio(P(t, OUT + .95, OUT + 1.55))));
+  const wm = eo(P(t, OUT + 1.45, OUT + 1.95));
+  tf($('wordmark'), { y: (1 - wm) * 30, o: wm });
+  const ts = P(t, T.keying, T.keying + .35);
+  tf($('teaser'), { y: (1 - eo(ts)) * 30, s: lerp(.9, 1, back(ts)), o: ts });
+}
+
+const NOCAP = new URLSearchParams(location.search).has('nocap');
+function seek(t) {
+  bg(t);
+  captions(t, NOCAP || (t > WIPE[0] && t < WIPE[0] + .35));
+  phoneA(t);
+  receiptScenes(t);
+  flow(t);
+  seller(t);
+  finger(t); if (NOCAP) vis($('finger'), false);
+  wipe(t);
+  outro(t);
+  tf($('grain'), { x: (Math.floor(t * 24) * 37) % 100 - 50, y: (Math.floor(t * 24) * 53) % 100 - 50 });
+}
+window.seek = seek;
+window.SFX = SFX;
+window.READY = document.fonts.ready.then(() => { seek(0); return true; });
+const qp = new URLSearchParams(location.search);
+if (qp.has('t')) READY.then(() => seek(+qp.get('t')));
+else if (!qp.has('render')) { const t0 = performance.now(); const loop = () => { seek(((performance.now() - t0) / 1000) % TL.duration); requestAnimationFrame(loop); }; READY.then(loop); }
+</script>
+</body>
+</html>

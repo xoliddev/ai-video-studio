@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tog'dagi Qorovulxona: Qor Bo'roni — 1-Qism</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #040508; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  canvas { width: 100vw; height: 177.77vw; max-width: 56.25vh; max-height: 100vh; display: block; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
+  .ui { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; background: rgba(10,12,18,0.85); padding: 10px 18px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 13px; z-index: 100; backdrop-filter: blur(8px); }
+  button { background: #222736; color: #f0f0f5; border: 1px solid #3c445c; border-radius: 20px; padding: 6px 14px; cursor: pointer; font: inherit; font-weight: 600; }
+  button:hover { background: #32394e; }
+  #track { width: 220px; height: 6px; background: #222; border-radius: 3px; position: relative; cursor: pointer; }
+  #fill { width: 0%; height: 100%; background: #e09938; border-radius: 3px; }
+  #time-disp { min-width: 80px; text-align: center; font-variant-numeric: tabular-nums; opacity: 0.8; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+
+<div class="ui" id="ui-bar">
+  <button id="btn-play">▶ Ijro</button>
+  <div id="track"><div id="fill"></div></div>
+  <span id="time-disp">00:00 / 00:00</span>
+</div>
+
+<audio id="audio" src="mix.wav" preload="auto"></audio>
+<script src="timeline.js"></script>
+
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('btn-play');
+const track = document.getElementById('track');
+const fill = document.getElementById('fill');
+const timeDisp = document.getElementById('time-disp');
+
+const TL_DATA = window.TL || { duration: 156.26, lines: [] };
+const DURATION = TL_DATA.duration;
+
+function sfc32(a, b, c, d) {
+  return function() {
+    a |= 0; b |= 0; c |= 0; d |= 0;
+    var t = (a + b | 0) + d | 0;
+    d = d + 1 | 0;
+    a = b ^ b >>> 9;
+    b = c + (c << 3) | 0;
+    c = c << 21 | c >>> 11;
+    c = c + t | 0;
+    return (t >>> 0) / 4294967296;
+  }
+}
+
+const rng = sfc32(777, 888, 999, 111);
+
+// Blizzard snow particles outside
+const SNOW_COUNT = 450;
+const snowParticles = [];
+for (let i = 0; i < SNOW_COUNT; i++) {
+  snowParticles.push({
+    x: rng() * W * 1.5 - W * 0.25,
+    y: rng() * H,
+    r: 1.2 + rng() * 3.5,
+    speedX: 25 + rng() * 45,
+    speedY: 15 + rng() * 25,
+    alpha: 0.2 + rng() * 0.6
+  });
+}
+
+// Fireplace embers
+const EMBER_COUNT = 45;
+const embers = [];
+for (let i = 0; i < EMBER_COUNT; i++) {
+  embers.push({
+    x: rng() * 120,
+    y: rng() * 180,
+    r: 1.0 + rng() * 2.5,
+    speedY: 1.5 + rng() * 2.5,
+    alpha: 0.3 + rng() * 0.7
+  });
+}
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+
+function seek(t) {
+  t = clamp(t, 0, DURATION);
+
+  // Background: Dark mountain cabin interior
+  ctx.fillStyle = '#06070a';
+  ctx.fillRect(0, 0, W, H);
+
+  // Big Mountain Window in top half (frost rimmed, looking into raging blizzard)
+  const winX = W * 0.15, winY = H * 0.12, winW = W * 0.70, winH = H * 0.46;
+
+  // Outer Blizzard Sky (Deep cold dark blue-grey)
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(winX, winY, winW, winH, 16);
+  ctx.clip();
+
+  const blizzardSky = ctx.createLinearGradient(0, winY, 0, winY + winH);
+  blizzardSky.addColorStop(0, '#070b14');
+  blizzardSky.addColorStop(0.6, '#0f1624');
+  blizzardSky.addColorStop(1, '#1a2436');
+  ctx.fillStyle = blizzardSky;
+  ctx.fillRect(winX, winY, winW, winH);
+
+  // Jagged Mountain Peaks in snow
+  ctx.fillStyle = '#0a0f1c';
+  ctx.beginPath();
+  ctx.moveTo(winX, winY + winH);
+  ctx.lineTo(winX + winW * 0.2, winY + winH * 0.35);
+  ctx.lineTo(winX + winW * 0.45, winY + winH * 0.55);
+  ctx.lineTo(winX + winW * 0.75, winY + winH * 0.28);
+  ctx.lineTo(winX + winW, winY + winH * 0.60);
+  ctx.lineTo(winX + winW, winY + winH);
+  ctx.closePath();
+  ctx.fill();
+
+  // Mountain snow highlights on ridges
+  ctx.strokeStyle = 'rgba(215, 230, 255, 0.25)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Three armed figures approaching through blizzard at climax (t >= 134.0s)
+  if (t >= 134.0) {
+    const kFig = clamp((t - 134.0) / 16.0, 0, 1);
+    const figAlpha = clamp((t - 134.0) / 3.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = figAlpha;
+    ctx.fillStyle = '#04070d';
+
+    for (let f = 0; f < 3; f++) {
+      const fx = winX + winW * (0.35 + f * 0.15) + (f - 1) * 20;
+      const fy = winY + winH * (0.65 - (1 - kFig) * 0.1);
+      const fscale = lerp(0.35, 0.85, kFig);
+
+      ctx.save();
+      ctx.translate(fx, fy);
+      ctx.scale(fscale, fscale);
+      // Figure body
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 18, 45, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Head with hood
+      ctx.beginPath();
+      ctx.arc(0, -50, 14, 0, Math.PI * 2);
+      ctx.fill();
+      // Rifle barrel silhouette
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#04070d';
+      ctx.beginPath();
+      ctx.moveTo(10, -10);
+      ctx.lineTo(25, -60);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // Raging Blizzard Wind Snow Particles
+  for (let i = 0; i < snowParticles.length; i++) {
+    const p = snowParticles[i];
+    const xNow = (p.x + t * p.speedX * 35) % (W * 1.5) - W * 0.25;
+    const yNow = (p.y + t * p.speedY * 20) % H;
+    ctx.fillStyle = `rgba(225, 235, 255, ${p.alpha})`;
+    ctx.beginPath();
+    ctx.arc(xNow, yNow, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Frost ice crystals on window glass edges
+  ctx.strokeStyle = 'rgba(230, 240, 255, 0.35)';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(winX, winY, winW, winH);
+
+  // Window grid frame
+  ctx.strokeStyle = '#0d1017';
+  ctx.lineWidth = 14;
+  ctx.beginPath();
+  ctx.moveTo(winX + winW / 2, winY);
+  ctx.lineTo(winX + winW / 2, winY + winH);
+  ctx.moveTo(winX, winY + winH / 2);
+  ctx.lineTo(winX + winW, winY + winH / 2);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // Heavy Door on the Right (shakes on knock at t=20.8s)
+  const doorX = W * 0.78, doorY = H * 0.48, doorW = 190, doorH = 480;
+  let doorShakeX = 0;
+  if (t >= 20.8 && t < 23.5) {
+    const kt = t - 20.8;
+    doorShakeX = Math.sin(kt * 35) * Math.exp(-kt * 2.5) * 6;
+  }
+
+  ctx.save();
+  ctx.translate(doorShakeX, 0);
+  ctx.fillStyle = '#0a0d14';
+  ctx.fillRect(doorX, doorY, doorW, doorH);
+  ctx.strokeStyle = '#1a2232';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(doorX, doorY, doorW, doorH);
+
+  // Heavy iron hinges and latch
+  ctx.fillStyle = '#1c2536';
+  ctx.fillRect(doorX + 15, doorY + 60, 40, 12);
+  ctx.fillRect(doorX + 15, doorY + 380, 40, 12);
+  ctx.fillRect(doorX + doorW - 35, doorY + 220, 20, 35);
+  ctx.restore();
+
+  // Stone Fireplace on the Left (x: 40, y: H*0.55)
+  const fpX = 140, fpY = H * 0.65;
+  // Stone arch
+  ctx.fillStyle = '#0a0c12';
+  ctx.beginPath();
+  ctx.arc(fpX, fpY, 110, Math.PI, 0);
+  ctx.lineTo(fpX + 110, fpY + 120);
+  ctx.lineTo(fpX - 110, fpY + 120);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#181f2c';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Fireplace Fire Glow
+  const fireFlicker = Math.sin(t * 12) * 0.15 + Math.cos(t * 19) * 0.10 + 0.75;
+  const fireGlow = ctx.createRadialGradient(fpX, fpY + 40, 10, fpX, fpY + 40, 240);
+  fireGlow.addColorStop(0, `rgba(255, 140, 30, ${0.85 * fireFlicker})`);
+  fireGlow.addColorStop(0.4, `rgba(240, 60, 10, ${0.40 * fireFlicker})`);
+  fireGlow.addColorStop(1, 'rgba(200, 30, 5, 0)');
+  ctx.fillStyle = fireGlow;
+  ctx.beginPath();
+  ctx.arc(fpX, fpY + 40, 240, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Flame tongues
+  ctx.fillStyle = '#ffedd5';
+  ctx.beginPath();
+  ctx.moveTo(fpX - 45, fpY + 80);
+  ctx.quadraticCurveTo(fpX - 25, fpY - 20 * fireFlicker, fpX, fpY + 80);
+  ctx.quadraticCurveTo(fpX + 25, fpY - 40 * fireFlicker, fpX + 45, fpY + 80);
+  ctx.closePath();
+  ctx.fill();
+
+  // Floating embers
+  for (let i = 0; i < embers.length; i++) {
+    const e = embers[i];
+    const ey = (e.y - t * e.speedY * 25 + 500) % 220;
+    const ex = fpX - 50 + (e.x + Math.sin(t * 3 + i) * 15);
+    ctx.fillStyle = `rgba(255, 180, 50, ${e.alpha * (1 - ey / 220)})`;
+    ctx.beginPath();
+    ctx.arc(ex, fpY + 60 - ey, e.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Wooden Cabin Table in Midground
+  const tblY = H * 0.68;
+  ctx.fillStyle = '#0d111a';
+  ctx.fillRect(W * 0.28, tblY, W * 0.44, 25);
+  ctx.strokeStyle = '#1c2436';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(W * 0.28, tblY, W * 0.44, 25);
+
+  // Steaming kettle / samovar on table
+  const ketX = W * 0.38, ketY = tblY - 35;
+  ctx.fillStyle = '#161c28';
+  ctx.fillRect(ketX - 18, ketY, 36, 35);
+  ctx.fillRect(ketX - 22, ketY - 8, 44, 8);
+  // Steam rising from kettle
+  ctx.strokeStyle = 'rgba(230, 240, 255, 0.20)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(ketX, ketY - 10);
+  ctx.bezierCurveTo(ketX - 10, ketY - 40, ketX + 15, ketY - 70, ketX - 5, ketY - 100);
+  ctx.stroke();
+
+  // Framed vintage photo on shelf (Pilot son - highlighted at t >= 90s)
+  const picX = W * 0.58, picY = tblY - 50;
+  ctx.fillStyle = '#141822';
+  ctx.fillRect(picX - 18, picY - 24, 36, 48);
+  ctx.strokeStyle = '#d97706';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(picX - 18, picY - 24, 36, 48);
+  // Pilot silhouette in frame
+  ctx.fillStyle = '#263044';
+  ctx.beginPath();
+  ctx.arc(picX, picY - 6, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ================= QOROVUL SILHOUETTE (Polkovnik Samadov) =================
+  ctx.fillStyle = '#06070a';
+  // Heavy winter coat & broad shoulders
+  ctx.beginPath();
+  ctx.ellipse(W * 0.30, H * 0.62, 70, 130, 0.05, 0, Math.PI * 2);
+  ctx.fill();
+  // Head profile with ushanka hat
+  ctx.beginPath();
+  ctx.arc(W * 0.30, H * 0.48, 45, 0, Math.PI * 2);
+  ctx.fill();
+  // Ushanka ear flaps
+  ctx.fillRect(W * 0.30 - 35, H * 0.46, 20, 40);
+
+  // Hunting Rifle in Samadov's hands (raised at t >= 147s)
+  const rifleAim = (t >= 147.0);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#05070a';
+  ctx.beginPath();
+  if (rifleAim) {
+    ctx.moveTo(W * 0.32, H * 0.54);
+    ctx.lineTo(W * 0.72, H * 0.52); // Aiming at door!
+  } else {
+    ctx.moveTo(W * 0.34, H * 0.68);
+    ctx.lineTo(W * 0.38, H * 0.46); // Resting rifle
+  }
+  ctx.stroke();
+
+  // Rifle highlight from fire
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255, 160, 40, 0.45)';
+  ctx.stroke();
+
+  // ================= BEGONA SILHOUETTE (Rustam) =================
+  // Enters cabin after t >= 31.0s
+  if (t >= 31.0) {
+    const enterAlpha = clamp((t - 31.0) / 2.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = enterAlpha;
+
+    // Sitting shivering near the fire
+    const bgnX = W * 0.46, bgnY = H * 0.66;
+    ctx.fillStyle = '#06070a';
+    ctx.beginPath();
+    ctx.ellipse(bgnX, bgnY, 55, 80, -0.15, 0, Math.PI * 2);
+    ctx.fill();
+    // Head shivering
+    const shiver = Math.sin(t * 22) * 1.5;
+    ctx.beginPath();
+    ctx.arc(bgnX + shiver, bgnY - 80, 38, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark Leather Notebook held up at t >= 72s to 105s
+    if (t >= 72.0 && t < 105.0) {
+      const bookAlpha = clamp((t - 72.0) / 1.5, 0, 1) * clamp((105.0 - t) / 1.5, 0, 1);
+      ctx.save();
+      ctx.globalAlpha = bookAlpha;
+      const nbX = bgnX - 25, nbY = bgnY - 30;
+
+      // Glow on the mysterious black notebook
+      ctx.fillStyle = 'rgba(240, 180, 80, 0.35)';
+      ctx.beginPath();
+      ctx.arc(nbX, nbY, 45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Leather notebook
+      ctx.fillStyle = '#1c1917';
+      ctx.fillRect(nbX - 16, nbY - 22, 32, 44);
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(nbX - 16, nbY - 22, 32, 44);
+
+      ctx.font = '600 13px Montserrat';
+      ctx.fillStyle = '#fef08a';
+      ctx.textAlign = 'center';
+      ctx.fillText('Qora daftarcha', nbX, nbY + 36);
+
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  // Gunshot Muzzle Flash at t=151.0 to 151.4s
+  if (t >= 151.0 && t < 151.4) {
+    const flashAlpha = (151.4 - t) / 0.4;
+    ctx.fillStyle = `rgba(255, 250, 230, ${0.95 * flashAlpha})`;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  // ================= SUBTITLES & DIALOGUE =================
+  let currentLine = null;
+  for (const line of TL_DATA.lines) {
+    if (t >= line.a && t <= line.b) {
+      currentLine = line;
+      break;
+    }
+  }
+
+  if (currentLine && t < 152.0) {
+    const isWatchman = (currentLine.char === 'qorovul');
+    const speakerName = isWatchman ? 'POLKOVNIK SAMADOV (QOROVUL)' : 'RUSTAM (BEGONA)';
+    const tagColor = isWatchman ? '#fbbf24' : '#67e8f9';
+
+    const boxY = H * 0.79;
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    ctx.font = '700 24px Montserrat';
+    ctx.fillStyle = tagColor;
+    ctx.fillText(speakerName, W * 0.5, boxY);
+
+    ctx.font = '600 38px Montserrat';
+    ctx.fillStyle = '#ffffff';
+
+    const words = currentLine.text.split(' ');
+    let linesArr = [];
+    let curLine = '';
+    for (const w of words) {
+      const test = curLine ? `${curLine} ${w}` : w;
+      if (ctx.measureText(test).width > W * 0.86) {
+        linesArr.push(curLine);
+        curLine = w;
+      } else {
+        curLine = test;
+      }
+    }
+    if (curLine) linesArr.push(curLine);
+
+    for (let li = 0; li < linesArr.length; li++) {
+      const lineY = boxY + 54 + (li * 50);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 3;
+      ctx.fillText(linesArr[li], W * 0.5, lineY);
+    }
+    ctx.restore();
+  }
+
+  // ================= INTRO & OUTRO TITLE CARDS =================
+  // Intro (t=0 to 4.5)
+  if (t < 4.5) {
+    const introAlpha = (t < 1.0) ? t : clamp((4.5 - t) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = introAlpha;
+    ctx.fillStyle = 'rgba(4, 6, 10, 0.80)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'center';
+    ctx.font = '700 50px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('TOG‘DAGI QOROVULXONA', W * 0.5, H * 0.45);
+
+    ctx.font = '600 28px Montserrat';
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText('1-QISM  ·  BO‘RON VA BEGONA', W * 0.5, H * 0.50);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Agatha Christie uslubida', W * 0.5, H * 0.54);
+    ctx.restore();
+  }
+
+  // Outro Cliffhanger (t >= 152.0)
+  if (t >= 152.0) {
+    ctx.fillStyle = '#020305';
+    ctx.fillRect(0, 0, W, H);
+
+    const outroAlpha = clamp((t - 152.0) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = outroAlpha;
+
+    ctx.textAlign = 'center';
+    ctx.font = '700 58px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('1-QISM TUGADI', W * 0.5, H * 0.46);
+
+    ctx.font = '600 32px Montserrat';
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillText('DAVOMI BOR...', W * 0.5, H * 0.52);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Keyingi qismda: Ostonadagi to‘qnashuv', W * 0.5, H * 0.58);
+    ctx.restore();
+  }
+}
+
+window.READY = true;
+window.seek = seek;
+seek(0);
+
+playBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play();
+    playBtn.textContent = '⏸ Pauza';
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶ Ijro';
+  }
+});
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+audio.addEventListener('timeupdate', () => {
+  const cur = audio.currentTime;
+  seek(cur);
+  const pct = (cur / DURATION) * 100;
+  fill.style.width = pct + '%';
+  timeDisp.textContent = `${formatTime(cur)} / ${formatTime(DURATION)}`;
+});
+
+track.addEventListener('click', e => {
+  const rect = track.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = ratio * DURATION;
+  seek(audio.currentTime);
+});
+
+audio.addEventListener('ended', () => {
+  playBtn.textContent = '▶ Boshidan';
+});
+</script>
+</body>
+</html>

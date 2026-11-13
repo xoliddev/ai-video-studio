@@ -1,0 +1,6 @@
+numpy
+imageio-ffmpeg
+requests          # uzbek-audio-series/shared and ab-dveloper-reels/tools Gemini TTS helpers
+edge-tts          # uhud-animated-film/tts.py (English cut) and togdagi-qorovulxona-ep2/voice_ep2.py
+moderngl          # voxel-castle-timelapse
+Pillow            # voxel-castle-timelapse

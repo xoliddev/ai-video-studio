@@ -1,0 +1,154 @@
+window.TL = {
+  "title": "Tog'dagi Qorovulxona — 1-Qism (Cinematic Cut)",
+  "subtitle": "Bo'ron va Begona",
+  "duration": 151.876,
+  "fps": 24,
+  "width": 1080,
+  "height": 1920,
+  "lines": [
+    {
+      "id": "q01",
+      "char": "samadov",
+      "shot": 1,
+      "text": "Tog'da qish boshqacha bo'ladi. Bo'ron uvillashi xuddi qadimgi sharpalarning faryodiga o'xshaydi. Bu balandlikda odam yo yolg'izlikka o'rganadi... yoki aqldan ozadi.",
+      "a": 5.5,
+      "b": 19.36,
+      "dur": 13.86
+    },
+    {
+      "id": "q02",
+      "char": "samadov",
+      "shot": 2,
+      "text": "Bu qahratonda qanday qilib tirik qolish mumkin?! Kim u?!",
+      "a": 23.16,
+      "b": 27.168,
+      "dur": 4.008
+    },
+    {
+      "id": "q03",
+      "char": "rustam",
+      "shot": 3,
+      "text": "Yordam bering... Iltimos, oching! Mashinam jarga quladi... Ular... ular ortimdan kelyapti!",
+      "a": 29.168,
+      "b": 34.762,
+      "dur": 5.594
+    },
+    {
+      "id": "q04",
+      "char": "samadov",
+      "shot": 4,
+      "text": "Kir, tezroq! Kir ichkariga. Eshikni zanjirla. Olovga yaqinroq o'tir, mana issiq choy.",
+      "a": 37.762,
+      "b": 44.458,
+      "dur": 6.695
+    },
+    {
+      "id": "q05",
+      "char": "rustam",
+      "shot": 5,
+      "text": "Rahmat... Qo'llarimni sezmayapman. Lekin siz eshikni mustahkamroq qulflang. Ular bu yerga yetib kelishdi.",
+      "a": 45.958,
+      "b": 53.729,
+      "dur": 7.771
+    },
+    {
+      "id": "q06",
+      "char": "samadov",
+      "shot": 2,
+      "text": "O'zingni bos, yigit. Bu dovonda bo'rilardan boshqa hech qanday tirik jon yo'q. Kim seni ta'qib qiladi?",
+      "a": 55.929,
+      "b": 61.952,
+      "dur": 6.023
+    },
+    {
+      "id": "q07",
+      "char": "rustam",
+      "shot": 5,
+      "text": "Ular bo'rilar emas! Ular odamlar. Uch kishi. Qora kiyingan, qo'llarida qurol bor. Ular butun qor bo'ylab izimdan kelishyapti.",
+      "a": 63.452,
+      "b": 73.157,
+      "dur": 9.705
+    },
+    {
+      "id": "q08",
+      "char": "samadov",
+      "shot": 2,
+      "text": "Nega? Oddiy yo'lovchining orqasidan uchta qurolli odam tushmaydi. Kimning yo'lini kesding?",
+      "a": 74.657,
+      "b": 80.46,
+      "dur": 5.803
+    },
+    {
+      "id": "q09",
+      "char": "rustam",
+      "shot": 6,
+      "text": "Men ularning qora daftarchasini ko'rib qoldim. O'n ikki yil oldin tog'da g'oyib bo'lgan o'sha samolyot haqidagi haqiqatni.",
+      "a": 82.46,
+      "b": 90.123,
+      "dur": 7.664
+    },
+    {
+      "id": "q10",
+      "char": "samadov",
+      "shot": 7,
+      "text": "Nima deding?! Qaysi samolyot?!",
+      "a": 92.523,
+      "b": 94.453,
+      "dur": 1.93
+    },
+    {
+      "id": "q11",
+      "char": "rustam",
+      "shot": 6,
+      "text": "Shimoliy reys. Yuz qirqta yo'lovchisi bilan g'oyib bo'lgan o'sha mashhur samolyot... Siz bilmaysiz, u texnik nosozlik emasdi. U ataylab portlatilgan!",
+      "a": 96.053,
+      "b": 107.195,
+      "dur": 11.142
+    },
+    {
+      "id": "q12",
+      "char": "samadov",
+      "shot": 7,
+      "text": "Men bilmaymanmi?.. O'sha samolyotning birinchi uchuvchisi... mening yagona o'g'lim edi.",
+      "a": 110.995,
+      "b": 117.306,
+      "dur": 6.311
+    },
+    {
+      "id": "q13",
+      "char": "rustam",
+      "shot": 5,
+      "text": "Nima?! Siz... siz o'sha polkovnik Samadovmisiz?!",
+      "a": 119.306,
+      "b": 123.827,
+      "dur": 4.521
+    },
+    {
+      "id": "q14",
+      "char": "samadov",
+      "shot": 8,
+      "text": "Ha. Men o'n ikki yildan beri mana shu kulbada o'tirib, o'g'limning qotillari qachon bu tog'dan o'tishini kutardim.",
+      "a": 125.327,
+      "b": 133.989,
+      "dur": 8.661
+    },
+    {
+      "id": "q15",
+      "char": "rustam",
+      "shot": 9,
+      "text": "Eshityapsizmi?.. Qor g'irchillayapti. Ular eshik orqasida!",
+      "a": 137.389,
+      "b": 142.033,
+      "dur": 4.644
+    },
+    {
+      "id": "q16",
+      "char": "samadov",
+      "shot": 10,
+      "text": "Sen qimirlama, Rustam bolam! Qurolga teginma, bularni o'zim kutib olaman!",
+      "a": 143.833,
+      "b": 148.576,
+      "dur": 4.743
+    }
+  ]
+};

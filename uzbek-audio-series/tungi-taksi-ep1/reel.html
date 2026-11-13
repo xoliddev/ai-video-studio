@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tungi Taksi: Oynadagi Yomg'ir — 1-Qism</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #040508; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  canvas { width: 100vw; height: 177.77vw; max-width: 56.25vh; max-height: 100vh; display: block; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
+  .ui { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; background: rgba(10,12,18,0.85); padding: 10px 18px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: 'Montserrat', sans-serif; font-size: 13px; z-index: 100; backdrop-filter: blur(8px); }
+  button { background: #222736; color: #f0f0f5; border: 1px solid #3c445c; border-radius: 20px; padding: 6px 14px; cursor: pointer; font: inherit; font-weight: 600; }
+  button:hover { background: #32394e; }
+  #track { width: 220px; height: 6px; background: #222; border-radius: 3px; position: relative; cursor: pointer; }
+  #fill { width: 0%; height: 100%; background: #e09938; border-radius: 3px; }
+  #time-disp { min-width: 80px; text-align: center; font-variant-numeric: tabular-nums; opacity: 0.8; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+
+<div class="ui" id="ui-bar">
+  <button id="btn-play">▶ Ijro</button>
+  <div id="track"><div id="fill"></div></div>
+  <span id="time-disp">00:00 / 00:00</span>
+</div>
+
+<audio id="audio" src="mix.wav" preload="auto"></audio>
+<script src="timeline.js"></script>
+
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const audio = document.getElementById('audio');
+const playBtn = document.getElementById('btn-play');
+const track = document.getElementById('track');
+const fill = document.getElementById('fill');
+const timeDisp = document.getElementById('time-disp');
+
+const TL_DATA = window.TL || { duration: 174.35, lines: [] };
+const DURATION = TL_DATA.duration;
+
+function sfc32(a, b, c, d) {
+  return function() {
+    a |= 0; b |= 0; c |= 0; d |= 0;
+    var t = (a + b | 0) + d | 0;
+    d = d + 1 | 0;
+    a = b ^ b >>> 9;
+    b = c + (c << 3) | 0;
+    c = c << 21 | c >>> 11;
+    c = c + t | 0;
+    return (t >>> 0) / 4294967296;
+  }
+}
+
+const rng = sfc32(101, 202, 303, 404);
+
+// City Bokeh Lights (street lamps, traffic lights, neon signs blurred through rain)
+const BOKEH_COUNT = 65;
+const bokehLights = [];
+const BOKEH_COLORS = [
+  'rgba(255, 180, 50, ',   // amber streetlight
+  'rgba(255, 60, 50, ',    // red traffic/brake light
+  'rgba(40, 220, 130, ',   // green traffic light
+  'rgba(60, 160, 255, ',   // cyan city neon
+  'rgba(255, 230, 190, '   // warm white shop window
+];
+
+for (let i = 0; i < BOKEH_COUNT; i++) {
+  bokehLights.push({
+    x: rng() * W,
+    y: H * 0.22 + rng() * (H * 0.40),
+    r: 18 + rng() * 45,
+    colorPrefix: BOKEH_COLORS[Math.floor(rng() * BOKEH_COLORS.length)],
+    speed: 0.4 + rng() * 1.8,
+    alphaBase: 0.18 + rng() * 0.42
+  });
+}
+
+// Falling rain particles
+const RAIN_COUNT = 360;
+const rainParticles = [];
+for (let i = 0; i < RAIN_COUNT; i++) {
+  rainParticles.push({
+    x: rng() * W * 1.3 - W * 0.15,
+    y: rng() * H,
+    len: 20 + rng() * 40,
+    speed: 30 + rng() * 25,
+    alpha: 0.15 + rng() * 0.35,
+    width: 1.2 + rng() * 1.4
+  });
+}
+
+// Windshield glass drops
+const GLASS_DROPS_COUNT = 220;
+const glassDrops = [];
+for (let i = 0; i < GLASS_DROPS_COUNT; i++) {
+  glassDrops.push({
+    x: rng() * W,
+    y: rng() * (H * 0.65),
+    r: 1.5 + rng() * 4.0,
+    alpha: 0.2 + rng() * 0.45
+  });
+}
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+function seek(t) {
+  t = clamp(t, 0, DURATION);
+
+  // Speed dynamics: taxi cruising steadily through night city (~55 km/h)
+  // Stops at t=12s for passenger to board, resumes, and at t=154s turns around
+  let speedKmH = 55;
+  if (t < 8) {
+    speedKmH = 55;
+  } else if (t >= 8 && t < 12) {
+    speedKmH = lerp(55, 0, (t - 8) / 4);
+  } else if (t >= 12 && t < 16) {
+    speedKmH = 0;
+  } else if (t >= 16 && t < 24) {
+    speedKmH = lerp(0, 50, (t - 16) / 8);
+  } else if (t >= 24 && t < 152) {
+    speedKmH = 50 + Math.sin(t * 0.4) * 4;
+  } else {
+    // Turning around & speeding up
+    speedKmH = lerp(45, 80, Math.min(1, (t - 152) / 10));
+  }
+
+  // Clear canvas: Deep rainy night city atmosphere
+  ctx.fillStyle = '#06080d';
+  ctx.fillRect(0, 0, W, H);
+
+  // Horizon & Sky
+  const horizonY = H * 0.45;
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+  skyGrad.addColorStop(0, '#040509');
+  skyGrad.addColorStop(1, '#0a0d18');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, W, horizonY);
+
+  // Distant City Skyline Silhouettes (buildings, towers, windows)
+  ctx.fillStyle = '#070a12';
+  for (let b = 0; b < 18; b++) {
+    const bx = b * 65 - 20;
+    const bw = 55;
+    const bh = 70 + (b * 37 % 140);
+    ctx.fillRect(bx, horizonY - bh, bw, bh);
+
+    // Small glowing yellow windows in distant buildings
+    ctx.fillStyle = 'rgba(255, 220, 140, 0.22)';
+    for (let wy = horizonY - bh + 15; wy < horizonY - 10; wy += 22) {
+      if ((b + wy) % 3 === 0) {
+        ctx.fillRect(bx + 12, wy, 8, 10);
+      }
+    }
+    ctx.fillStyle = '#070a12';
+  }
+
+  // Wet City Street / Asphalt with Reflections
+  const roadGrad = ctx.createLinearGradient(0, horizonY, 0, H * 0.72);
+  roadGrad.addColorStop(0, '#0a0d16');
+  roadGrad.addColorStop(0.5, '#121724');
+  roadGrad.addColorStop(1, '#0e121c');
+  ctx.fillStyle = roadGrad;
+  ctx.fillRect(0, horizonY, W, H * 0.72 - horizonY);
+
+  // Perspective Road
+  const roadTopW = 140;
+  const roadBottomW = 1200;
+  const cx = W * 0.5;
+
+  ctx.fillStyle = '#0f1420';
+  ctx.beginPath();
+  ctx.moveTo(cx - roadTopW / 2, horizonY);
+  ctx.lineTo(cx + roadTopW / 2, horizonY);
+  ctx.lineTo(cx + roadBottomW / 2, H * 0.72);
+  ctx.lineTo(cx - roadBottomW / 2, H * 0.72);
+  ctx.closePath();
+  ctx.fill();
+
+  // Moving road lane stripes
+  const roadSpeed = (speedKmH / 50) * 10.0;
+  const stripeOffset = (t * roadSpeed) % 1.0;
+  ctx.fillStyle = 'rgba(240, 240, 245, 0.40)';
+
+  for (let i = 0; i < 9; i++) {
+    const k1 = (i + stripeOffset) / 9;
+    const k2 = (i + stripeOffset + 0.45) / 9;
+    if (k1 < 0 || k2 > 1) continue;
+
+    const y1 = horizonY + Math.pow(k1, 2.2) * (H * 0.72 - horizonY);
+    const y2 = horizonY + Math.pow(k2, 2.2) * (H * 0.72 - horizonY);
+    const w1 = lerp(4, 26, k1);
+    const w2 = lerp(4, 26, k2);
+
+    ctx.beginPath();
+    ctx.moveTo(cx - w1 / 2, y1);
+    ctx.lineTo(cx + w1 / 2, y1);
+    ctx.lineTo(cx + w2 / 2, y2);
+    ctx.lineTo(cx - w2 / 2, y2);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Bokeh City Lights (Reflections of city lights blurred by rain)
+  for (let i = 0; i < bokehLights.length; i++) {
+    const bk = bokehLights[i];
+    const bkX = (bk.x - t * bk.speed * 20 + W * 3) % (W * 1.2) - W * 0.1;
+    const grad = ctx.createRadialGradient(bkX, bk.y, 2, bkX, bk.y, bk.r);
+    grad.addColorStop(0, bk.colorPrefix + (bk.alphaBase * 0.9) + ')');
+    grad.addColorStop(0.5, bk.colorPrefix + (bk.alphaBase * 0.4) + ')');
+    grad.addColorStop(1, bk.colorPrefix + '0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(bkX, bk.y, bk.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Red Tail lights of car ahead
+  if (t > 15 && t < 150) {
+    const carAheadY = horizonY + 80;
+    const carAheadX = cx + 80;
+    ctx.fillStyle = 'rgba(255, 40, 40, 0.65)';
+    ctx.beginPath();
+    ctx.arc(carAheadX - 25, carAheadY, 12, 0, Math.PI * 2);
+    ctx.arc(carAheadX + 25, carAheadY, 12, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Falling Rain Streaks
+  ctx.strokeStyle = 'rgba(210, 225, 255, 0.32)';
+  for (let i = 0; i < rainParticles.length; i++) {
+    const p = rainParticles[i];
+    const yNow = (p.y + t * p.speed * 40) % H;
+    const xNow = p.x - (yNow / H) * 60;
+    ctx.lineWidth = p.width;
+    ctx.beginPath();
+    ctx.moveTo(xNow, yNow);
+    ctx.lineTo(xNow - 6, yNow + p.len);
+    ctx.stroke();
+  }
+
+  // Raindrops on Glass
+  for (let i = 0; i < glassDrops.length; i++) {
+    const d = glassDrops[i];
+    const dropY = (d.y + Math.sin(t * 0.15 + i) * 3) % (H * 0.64);
+    ctx.fillStyle = `rgba(200, 225, 255, ${d.alpha})`;
+    ctx.beginPath();
+    ctx.arc(d.x, dropY, d.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Windshield Wipers
+  const wiperPeriod = 1.85;
+  const wipeCycle = (t % wiperPeriod) / wiperPeriod;
+  let wipeAngle = 0;
+  if (wipeCycle < 0.45) {
+    wipeAngle = lerp(-0.75, 0.75, easeInOut(wipeCycle / 0.45));
+  } else if (wipeCycle < 0.90) {
+    wipeAngle = lerp(0.75, -0.75, easeInOut((wipeCycle - 0.45) / 0.45));
+  } else {
+    wipeAngle = -0.75;
+  }
+
+  const wiperOrigins = [W * 0.32, W * 0.72];
+  for (const ox of wiperOrigins) {
+    const oy = H * 0.66;
+    const wLen = 330;
+    const wx = ox + Math.sin(wipeAngle) * wLen;
+    const wy = oy - Math.cos(wipeAngle) * wLen * 0.72;
+
+    ctx.lineWidth = 8;
+    ctx.strokeStyle = '#161922';
+    ctx.beginPath();
+    ctx.moveTo(ox, oy);
+    ctx.lineTo(wx, wy);
+    ctx.stroke();
+
+    ctx.lineWidth = 14;
+    ctx.strokeStyle = '#0a0d14';
+    ctx.beginPath();
+    ctx.moveTo(wx - 24, wy);
+    ctx.lineTo(wx + 24, wy);
+    ctx.stroke();
+  }
+
+  // Rearview Mirror at Top Center (Reflecting Akmal aka in the back seat!)
+  const mirrorW = 320, mirrorH = 95;
+  const mirrorX = (W - mirrorW) / 2, mirrorY = 75;
+  ctx.fillStyle = '#080a10';
+  ctx.beginPath();
+  ctx.roundRect(mirrorX, mirrorY, mirrorW, mirrorH, 18);
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#1a2030';
+  ctx.stroke();
+
+  // Inside Mirror View
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(mirrorX + 6, mirrorY + 6, mirrorW - 12, mirrorH - 12, 14);
+  ctx.clip();
+  ctx.fillStyle = '#05070c';
+  ctx.fillRect(mirrorX, mirrorY, mirrorW, mirrorH);
+
+  // Rear seat reflection
+  if (t >= 11.5) {
+    // Passenger silhouette in rear seat visible in mirror
+    ctx.fillStyle = '#0a0e16';
+    ctx.beginPath();
+    ctx.arc(mirrorX + mirrorW * 0.65, mirrorY + mirrorH * 0.75, 26, 0, Math.PI * 2);
+    ctx.fill();
+    // Driver eyes reflection on left side of mirror
+    ctx.fillStyle = '#121722';
+    ctx.fillRect(mirrorX + 25, mirrorY + 35, 75, 25);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.beginPath();
+    ctx.arc(mirrorX + 50, mirrorY + 47, 4, 0, Math.PI * 2);
+    ctx.arc(mirrorX + 75, mirrorY + 47, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // ================= CAR CABIN & DASHBOARD =================
+  const dashY = H * 0.63;
+  const dashGrad = ctx.createLinearGradient(0, dashY, 0, H);
+  dashGrad.addColorStop(0, '#090b12');
+  dashGrad.addColorStop(0.35, '#0e121c');
+  dashGrad.addColorStop(1, '#05070a');
+  ctx.fillStyle = dashGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, dashY);
+  ctx.lineTo(W * 0.42, dashY + 45);
+  ctx.lineTo(W * 0.58, dashY + 45);
+  ctx.lineTo(W, dashY);
+  ctx.lineTo(W, H);
+  ctx.lineTo(0, H);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = '#181e2b';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, dashY);
+  ctx.lineTo(W * 0.42, dashY + 45);
+  ctx.lineTo(W * 0.58, dashY + 45);
+  ctx.lineTo(W, dashY);
+  ctx.stroke();
+
+  // Taxi Meter Display in Center Dashboard
+  const meterX = W * 0.5, meterY = dashY + 95;
+  ctx.fillStyle = '#06080e';
+  ctx.beginPath();
+  ctx.roundRect(meterX - 110, meterY - 30, 220, 60, 10);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#1c2436';
+  ctx.stroke();
+
+  // Glowing Green Taximeter Text
+  ctx.font = '700 13px Montserrat';
+  ctx.fillStyle = '#10b981';
+  ctx.textAlign = 'center';
+  ctx.fillText('TOSHKENT TAKSI  ·  BAND', meterX, meterY - 10);
+
+  const fareSum = Math.min(185000, 35000 + Math.floor(t * 850));
+  ctx.font = '700 18px Montserrat';
+  ctx.fillStyle = '#34d399';
+  ctx.fillText(`${fareSum.toLocaleString()} SO'M`, meterX, meterY + 16);
+
+  // Speedometer Gauge on Left
+  const gaugeX = W * 0.25, gaugeY = dashY + 115, gaugeR = 60;
+  ctx.fillStyle = '#06080e';
+  ctx.beginPath();
+  ctx.arc(gaugeX, gaugeY, gaugeR, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#1c2434';
+  ctx.stroke();
+
+  // Amber glowing ticks
+  ctx.strokeStyle = '#e09838';
+  ctx.lineWidth = 2;
+  for (let a = -Math.PI * 0.75; a <= Math.PI * 0.75; a += Math.PI * 0.15) {
+    const gx1 = gaugeX + Math.cos(a) * (gaugeR - 10);
+    const gy1 = gaugeY + Math.sin(a) * (gaugeR - 10);
+    const gx2 = gaugeX + Math.cos(a) * (gaugeR - 4);
+    const gy2 = gaugeY + Math.sin(a) * (gaugeR - 4);
+    ctx.beginPath();
+    ctx.moveTo(gx1, gy1);
+    ctx.lineTo(gx2, gy2);
+    ctx.stroke();
+  }
+
+  // Needle
+  const speedAngle = lerp(-Math.PI * 0.75, Math.PI * 0.75, clamp(speedKmH / 160, 0, 1));
+  ctx.strokeStyle = '#ff4d4d';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(gaugeX, gaugeY);
+  ctx.lineTo(gaugeX + Math.cos(speedAngle) * (gaugeR - 12), gaugeY + Math.sin(speedAngle) * (gaugeR - 12));
+  ctx.stroke();
+
+  ctx.font = '600 14px Montserrat';
+  ctx.fillStyle = '#e09838';
+  ctx.fillText(`${Math.round(speedKmH)} km/h`, gaugeX, gaugeY + 36);
+
+  // Turn signal flashing when turning around (t >= 153s)
+  if (t >= 153.0) {
+    const sigPhase = Math.sin(t * 8.0);
+    if (sigPhase > 0) {
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.moveTo(gaugeX - 25, gaugeY - 45);
+      ctx.lineTo(gaugeX - 35, gaugeY - 40);
+      ctx.lineTo(gaugeX - 25, gaugeY - 35);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // ================= DRIVER & STEERING WHEEL =================
+  ctx.fillStyle = '#06070b';
+  ctx.beginPath();
+  ctx.ellipse(W * 0.16, dashY + 40, 75, 110, -0.05, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(W * 0.15, dashY - 85, 50, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Steering wheel
+  ctx.lineWidth = 18;
+  ctx.strokeStyle = '#0a0d13';
+  ctx.beginPath();
+  ctx.arc(W * 0.24, dashY + 50, 100, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.stroke();
+
+  // ================= CASH BUNDLE ON DASH (t >= 26.0s) =================
+  if (t >= 26.0) {
+    const cashAlpha = clamp((t - 26.0) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = cashAlpha;
+    ctx.fillStyle = '#1e3a2b';
+    ctx.fillRect(W * 0.38, dashY + 35, 55, 30);
+    ctx.fillStyle = '#2d5a42';
+    ctx.fillRect(W * 0.38 + 3, dashY + 32, 55, 30);
+    ctx.strokeStyle = '#34d399';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(W * 0.38 + 3, dashY + 32, 55, 30);
+    ctx.restore();
+  }
+
+  // ================= WOODEN TOY CAR (t >= 115.0s) =================
+  if (t >= 115.0 && t < 155.0) {
+    const toyAlpha = clamp((t - 115.0) / 1.5, 0, 1) * clamp((155.0 - t) / 1.5, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = toyAlpha;
+
+    const toyX = W * 0.72, toyY = dashY - 15;
+    // Warm spotlight on the toy car
+    const toyGlow = ctx.createRadialGradient(toyX, toyY, 5, toyX, toyY, 110);
+    toyGlow.addColorStop(0, 'rgba(245, 180, 80, 0.45)');
+    toyGlow.addColorStop(1, 'rgba(245, 180, 80, 0)');
+    ctx.fillStyle = toyGlow;
+    ctx.beginPath();
+    ctx.arc(toyX, toyY, 110, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Wooden toy car body
+    ctx.fillStyle = '#b45309'; // warm wood amber
+    ctx.beginPath();
+    ctx.roundRect(toyX - 35, toyY - 15, 70, 22, 6);
+    ctx.fill();
+    // Toy cabin
+    ctx.fillStyle = '#92400e';
+    ctx.beginPath();
+    ctx.roundRect(toyX - 18, toyY - 32, 36, 18, 4);
+    ctx.fill();
+    // Toy wheels
+    ctx.fillStyle = '#451a03';
+    ctx.beginPath();
+    ctx.arc(toyX - 22, toyY + 8, 8, 0, Math.PI * 2);
+    ctx.arc(toyX + 22, toyY + 8, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = '600 13px Montserrat';
+    ctx.fillStyle = '#fde68a';
+    ctx.textAlign = 'center';
+    ctx.fillText('Eski yog‘och mashinacha', toyX, toyY + 34);
+
+    ctx.restore();
+  }
+
+  // ================= SUBTITLES & DIALOGUE =================
+  let currentLine = null;
+  for (const line of TL_DATA.lines) {
+    if (t >= line.a && t <= line.b) {
+      currentLine = line;
+      break;
+    }
+  }
+
+  if (currentLine && t < 168.0) {
+    const isDriver = (currentLine.char === 'taksichi');
+    const speakerName = isDriver ? 'TAKSICHI' : 'AKMAL AKA (MIJOZ)';
+    const tagColor = isDriver ? '#38bdf8' : '#fbbf24';
+
+    const boxY = H * 0.79;
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    ctx.font = '700 24px Montserrat';
+    ctx.fillStyle = tagColor;
+    ctx.fillText(speakerName, W * 0.5, boxY);
+
+    ctx.font = '600 38px Montserrat';
+    ctx.fillStyle = '#ffffff';
+
+    const words = currentLine.text.split(' ');
+    let linesArr = [];
+    let curLine = '';
+    for (const w of words) {
+      const test = curLine ? `${curLine} ${w}` : w;
+      if (ctx.measureText(test).width > W * 0.86) {
+        linesArr.push(curLine);
+        curLine = w;
+      } else {
+        curLine = test;
+      }
+    }
+    if (curLine) linesArr.push(curLine);
+
+    for (let li = 0; li < linesArr.length; li++) {
+      const lineY = boxY + 54 + (li * 50);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 3;
+      ctx.fillText(linesArr[li], W * 0.5, lineY);
+    }
+    ctx.restore();
+  }
+
+  // ================= INTRO & OUTRO TITLE CARDS =================
+  // Intro (t=0 to 4.5)
+  if (t < 4.5) {
+    const introAlpha = (t < 1.0) ? t : clamp((4.5 - t) / 1.0, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = introAlpha;
+    ctx.fillStyle = 'rgba(4, 6, 10, 0.75)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'center';
+    ctx.font = '700 50px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('TUNGI TAKSI', W * 0.5, H * 0.45);
+
+    ctx.font = '600 28px Montserrat';
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText('1-QISM  ·  SOAT 02:40 DAGI MIJOZ', W * 0.5, H * 0.50);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Oynadagi Yomg‘ir', W * 0.5, H * 0.54);
+    ctx.restore();
+  }
+
+  // Outro Cliffhanger (t >= 168.0)
+  if (t >= 168.0) {
+    const outroAlpha = clamp((t - 168.0) / 1.5, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = outroAlpha;
+    ctx.fillStyle = '#030407';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'center';
+    ctx.font = '700 58px Cinzel';
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillText('1-QISM TUGADI', W * 0.5, H * 0.46);
+
+    ctx.font = '600 32px Montserrat';
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText('DAVOMI BOR...', W * 0.5, H * 0.52);
+
+    ctx.font = '400 22px Montserrat';
+    ctx.fillStyle = '#64748b';
+    ctx.fillText('Keyingi qismda: Qulflangan eshik ostonasida', W * 0.5, H * 0.58);
+    ctx.restore();
+  }
+}
+
+window.READY = true;
+window.seek = seek;
+seek(0);
+
+playBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play();
+    playBtn.textContent = '⏸ Pauza';
+  } else {
+    audio.pause();
+    playBtn.textContent = '▶ Ijro';
+  }
+});
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+audio.addEventListener('timeupdate', () => {
+  const cur = audio.currentTime;
+  seek(cur);
+  const pct = (cur / DURATION) * 100;
+  fill.style.width = pct + '%';
+  timeDisp.textContent = `${formatTime(cur)} / ${formatTime(DURATION)}`;
+});
+
+track.addEventListener('click', e => {
+  const rect = track.getBoundingClientRect();
+  const ratio = (e.clientX - rect.left) / rect.width;
+  audio.currentTime = ratio * DURATION;
+  seek(audio.currentTime);
+});
+
+audio.addEventListener('ended', () => {
+  playBtn.textContent = '▶ Boshidan';
+});
+</script>
+</body>
+</html>

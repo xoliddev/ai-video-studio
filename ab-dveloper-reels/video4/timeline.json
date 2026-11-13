@@ -1,0 +1,59 @@
+{
+ "duration": 31.711,
+ "lines": [
+  {
+   "text": "Bu — bitta buyurtma.",
+   "who": "narrator",
+   "a": 0.75,
+   "b": 2.55
+  },
+  {
+   "text": "Lekin u hech qachon yolg'iz yurmaydi.",
+   "who": "narrator",
+   "a": 2.89,
+   "b": 6.61
+  },
+  {
+   "text": "U avval qahvaxonani uyg'otadi.",
+   "who": "narrator",
+   "a": 6.95,
+   "b": 9.75
+  },
+  {
+   "text": "Keyin pulni topadi.",
+   "who": "narrator",
+   "a": 10.09,
+   "b": 11.639
+  },
+  {
+   "text": "Rasmni emas — haqiqiy to'lovni.",
+   "who": "narrator",
+   "a": 11.979,
+   "b": 16.589
+  },
+  {
+   "text": "Keyin eng yaqin kuryerni.",
+   "who": "narrator",
+   "a": 16.929,
+   "b": 19.029
+  },
+  {
+   "text": "Bularning hammasi bir-birini tanib turadi.",
+   "who": "narrator",
+   "a": 19.369,
+   "b": 23.508
+  },
+  {
+   "text": "Shuning uchun yaxshi tizim shovqin qilmaydi.",
+   "who": "narrator",
+   "a": 23.848,
+   "b": 26.706
+  },
+  {
+   "text": "U shunchaki ishni o'z vaqtida bitiradi.",
+   "who": "narrator",
+   "a": 27.046,
+   "b": 29.211
+  }
+ ]
+}

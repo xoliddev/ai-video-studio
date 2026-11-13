@@ -1,0 +1,140 @@
+{
+  "title": "Tog'dagi Qorovulxona — 2-Qism (Cinematic Master)",
+  "subtitle": "Ostonadagi To'qnashuv",
+  "duration": 152.578,
+  "fps": 24,
+  "width": 1080,
+  "height": 1920,
+  "lines": [
+    {
+      "id": "e2_01",
+      "speaker": "POLKOVNIK SAMADOV",
+      "char": "samadov",
+      "shot": 1,
+      "text": "Eshikni sindirishdi... Qimirlama, Rustam!",
+      "a": 6.0,
+      "b": 8.799,
+      "dur": 2.799
+    },
+    {
+      "id": "e2_02",
+      "speaker": "QORA NIQOBLI BOSHLIQ",
+      "char": "boshliq",
+      "shot": 2,
+      "text": "Miltiqni tushir, chol. Bu yerda buyruqni men beraman.",
+      "a": 13.799,
+      "b": 16.829,
+      "dur": 3.03
+    },
+    {
+      "id": "e2_03",
+      "speaker": "POLKOVNIK SAMADOV",
+      "char": "samadov",
+      "shot": 3,
+      "text": "Mening ostonamga qurol bilan bostirib kirgan odam buyruq berolmaydi. Yana bir qadam bossang, ko'kragingga qo'rg'oshin kiradi.",
+      "a": 21.329,
+      "b": 29.841,
+      "dur": 8.512
+    },
+    {
+      "id": "e2_04",
+      "speaker": "QORA NIQOBLI BOSHLIQ",
+      "char": "boshliq",
+      "shot": 4,
+      "text": "Qaribsan, polkovnik Samadov... Haliyam o'sha eski gvardiyaning o'jar tabiati. O'g'ling Temur ham o'sha samolyot kabinasida xuddi shunday gapirgan edi.",
+      "a": 35.341,
+      "b": 44.674,
+      "dur": 9.333
+    },
+    {
+      "id": "e2_05",
+      "speaker": "RUSTAM (BEGONA)",
+      "char": "rustam",
+      "shot": 5,
+      "text": "Polkovnik, unga quloq solmang! Ular tirik qoldirmaydi, hech kimni tirik qoldirmaydi!",
+      "a": 49.874,
+      "b": 54.857,
+      "dur": 4.983
+    },
+    {
+      "id": "e2_06",
+      "speaker": "POLKOVNIK SAMADOV",
+      "char": "samadov",
+      "shot": 6,
+      "text": "Demak, o'g'limning samolyotini portlatgan vijdonsiz qotil sen ekansanda?! Yuz qirqta begunoh yo'lovchining uvoli tutmadimi seni?!",
+      "a": 60.657,
+      "b": 68.859,
+      "dur": 8.202
+    },
+    {
+      "id": "e2_07",
+      "speaker": "QORA NIQOBLI BOSHLIQ",
+      "char": "boshliq",
+      "shot": 7,
+      "text": "Bu shaxsiy masala emasdi, polkovnik. Shunchaki katta buyruq. O'sha reysda xoinlikni fosh qiluvchi komissiya uchayotgan edi. Ular yerga sog'-omon qo'nishi mumkin emasdi.",
+      "a": 74.059,
+      "b": 85.387,
+      "dur": 11.328
+    },
+    {
+      "id": "e2_08",
+      "speaker": "QORA NIQOBLI BOSHLIQ",
+      "char": "boshliq",
+      "shot": 7,
+      "text": "Va bugun ham o'sha qoidamiz o'zgarmagan: bu sirni bilgan hech kim bu tog'dan tirik tushmaydi!",
+      "a": 89.387,
+      "b": 96.125,
+      "dur": 6.738
+    },
+    {
+      "id": "e2_09",
+      "speaker": "RUSTAM (BEGONA)",
+      "char": "rustam",
+      "shot": 8,
+      "text": "Daftarchada barcha buyurtmachilarning ismi bor... Ular orasida general Karimov ham bor, polkovnik!",
+      "a": 101.125,
+      "b": 107.154,
+      "dur": 6.029
+    },
+    {
+      "id": "e2_10",
+      "speaker": "POLKOVNIK SAMADOV",
+      "char": "samadov",
+      "shot": 3,
+      "text": "Karimov?.. Demak, sotqin eng tepada o'tirgan ekan...",
+      "a": 113.154,
+      "b": 116.542,
+      "dur": 3.388
+    },
+    {
+      "id": "e2_11",
+      "speaker": "QORA NIQOBLI BOSHLIQ",
+      "char": "boshliq",
+      "shot": 9,
+      "text": "Ortiqcha gapirdingiz. Yigitlar, ikkalasini ham joyida yo'qotinglar!",
+      "a": 121.042,
+      "b": 126.26,
+      "dur": 5.218
+    },
+    {
+      "id": "e2_12",
+      "speaker": "RUSTAM (BEGONA)",
+      "char": "rustam",
+      "shot": 5,
+      "text": "Polkovnik, otishyapti!!",
+      "a": 129.06,
+      "b": 130.602,
+      "dur": 1.542
+    },
+    {
+      "id": "e2_13",
+      "speaker": "POLKOVNIK SAMADOV",
+      "char": "samadov",
+      "shot": 10,
+      "text": "Yot pastga, Rustam! Qorong'uda jang qilamiz!!",
+      "a": 132.802,
+      "b": 136.078,
+      "dur": 3.276
+    }
+  ]
+}

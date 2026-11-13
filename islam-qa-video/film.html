@@ -1,0 +1,230 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Islom haqida 5 savol</title>
+<style>html,body{margin:0;background:#04161a}canvas{display:block;max-height:100vh;margin:auto}</style>
+</head><body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="timeline.js"></script>
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('c'), g = cv.getContext('2d');
+const GOLD = '#D9B66A', GOLD2 = '#F2D898', CREAM = '#F4EEDF', MUTED = 'rgba(244,238,223,.62)';
+const SANS = '"Segoe UI", sans-serif', NUM = 'Bahnschrift, "Segoe UI", sans-serif', AR = '"Arabic Typesetting", "Traditional Arabic", serif';
+const ORD = ['', 'BIRINCHI', 'IKKINCHI', 'UCHINCHI', "TO'RTINCHI", 'BESHINCHI'];
+
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = x => { x = clamp(x); return 1 - Math.pow(1 - x, 3); };
+const back = x => { x = clamp(x); const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const ramp = (t, a, d) => ease((t - a) / d);
+
+// item reveal times: position of each key inside the spoken answer, mapped onto the answer audio span
+const SEG = TL.segments.map((s, i) => {
+  const sc = TL.script[i];
+  const o = Object.assign({}, sc, s);
+  if (sc.items) {
+    const ans = sc.answer.toLowerCase(), span = s.ans_end - s.ans;
+    o.itemT = sc.keys.map(k => s.ans + span * ans.indexOf(k) / ans.length - .1);
+    o.n = TL.segments.slice(0, i + 1).filter((x, j) => TL.script[j].items).length;
+  }
+  return o;
+});
+
+function star(x, y, r) {
+  g.beginPath();
+  for (let i = 0; i < 16; i++) {
+    const a = i * Math.PI / 8 - Math.PI / 2, rr = i % 2 ? r * .62 : r;
+    g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+  }
+  g.closePath();
+}
+
+function background(t) {
+  const rg = g.createRadialGradient(W / 2, H * .42, 60, W / 2, H * .5, H * .75);
+  rg.addColorStop(0, '#11463f'); rg.addColorStop(.55, '#0a2b2b'); rg.addColorStop(1, '#03121a');
+  g.fillStyle = rg; g.fillRect(0, 0, W, H);
+  // girih-like star lattice, drifting slowly
+  const S = 180, off = (t * 6) % S;
+  g.save(); g.lineWidth = 2; g.strokeStyle = 'rgba(217,182,106,.075)';
+  for (let y = -S; y < H + S; y += S) for (let x = -S; x < W + S; x += S) {
+    const cx = x + (y / S % 2 ? S / 2 : 0) + off * .5, cy = y + off;
+    star(cx, cy, 62); g.stroke();
+    g.beginPath(); g.arc(cx, cy, 24, 0, 7); g.stroke();
+  }
+  g.restore();
+  // floating light motes
+  g.save();
+  for (let i = 0; i < 26; i++) {
+    const sx = (i * 397) % W, sp = 14 + (i * 7) % 20;
+    const y = H - ((t * sp + i * 173) % (H + 100)) + 50, x = sx + Math.sin(t * .4 + i) * 30;
+    const a = .12 + .1 * Math.sin(t * 1.3 + i * 2);
+    g.fillStyle = `rgba(242,216,152,${a})`; g.beginPath(); g.arc(x, y, 2 + i % 3, 0, 7); g.fill();
+  }
+  g.restore();
+  const vg = g.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .78);
+  vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)');
+  g.fillStyle = vg; g.fillRect(0, 0, W, H);
+}
+
+// mihrab arch frame
+function arch(alpha) {
+  const L = 90, R = 990, top = 330, bot = 1690, spring = 560, cx = W / 2;
+  g.save(); g.globalAlpha = alpha;
+  for (const [inset, lw, col] of [[0, 3, GOLD], [18, 1.5, 'rgba(217,182,106,.45)']]) {
+    const l = L + inset, r = R - inset, tp = top + inset * 1.4, b = bot - inset;
+    g.beginPath(); g.moveTo(l, b); g.lineTo(l, spring);
+    g.quadraticCurveTo(l, tp + 90, cx, tp); g.quadraticCurveTo(r, tp + 90, r, spring);
+    g.lineTo(r, b); g.closePath();
+    g.lineWidth = lw; g.strokeStyle = col; g.stroke();
+  }
+  g.fillStyle = GOLD; star(cx, top - 6, 16); g.fill();
+  g.restore();
+}
+
+function header(t, active) {
+  g.save(); g.textAlign = 'center'; g.fillStyle = GOLD;
+  g.font = `600 34px ${SANS}`; g.letterSpacing = '10px';
+  g.fillText('ISLOM  ·  SAVOL-JAVOB', W / 2 + 5, 180); g.letterSpacing = '0px';
+  for (let i = 1; i <= 5; i++) {
+    const x = W / 2 + (i - 3) * 54, y = 238, on = i <= active;
+    g.beginPath(); g.save(); g.translate(x, y); g.rotate(Math.PI / 4);
+    g.rect(-9, -9, 18, 18); g.restore();
+    if (on) { g.fillStyle = i === active ? GOLD2 : GOLD; g.fill(); }
+    else { g.lineWidth = 2; g.strokeStyle = 'rgba(217,182,106,.5)'; g.stroke(); }
+  }
+  g.restore();
+}
+
+function wrap(text, font, maxW) {
+  g.font = font;
+  const words = text.split(' '), lines = [];
+  let cur = '';
+  for (const w of words) {
+    const test = cur ? cur + ' ' + w : w;
+    if (g.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; } else cur = test;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function text(s, x, y, font, color, alpha = 1, align = 'center') {
+  g.save(); g.globalAlpha *= alpha; g.font = font; g.fillStyle = color; g.textAlign = align; g.textBaseline = 'middle';
+  g.fillText(s, x, y); g.restore();
+}
+
+function intro(t, s) {
+  const lt = t - s.a;
+  const out = 1 - ramp(t, s.b - .45, .45);
+  g.save(); g.globalAlpha = out;
+  text('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', W / 2, 560 + 20 * (1 - ramp(lt, .2, 1)), `120px ${AR}`, GOLD2, ramp(lt, .2, 1));
+  const y0 = 860;
+  text('Islom haqida', W / 2, y0 + 40 * (1 - ramp(lt, .9, .8)), `700 104px ${SANS}`, CREAM, ramp(lt, .9, .8));
+  const p = back((lt - 1.5) / .7);
+  g.save(); g.translate(W / 2, y0 + 190); g.scale(p, p);
+  text('5 ta savol', 0, 0, `700 170px ${NUM}`, GOLD, clamp((lt - 1.5) / .3)); g.restore();
+  // ornament line
+  const lw = 320 * ramp(lt, 2.2, .8);
+  g.fillStyle = GOLD; g.fillRect(W / 2 - lw, y0 + 330, lw * 2, 3);
+  g.fillStyle = GOLD2; star(W / 2, y0 + 331, 14 * ramp(lt, 2.2, .5)); g.fill();
+  text('qisqa va aniq javoblar', W / 2, y0 + 420, `400 54px ${SANS}`, MUTED, ramp(lt, 2.6, .8));
+  g.restore();
+}
+
+function qa(t, s) {
+  const lt = t - s.a, inA = ramp(t, s.a, .5), out = 1 - ramp(t, s.b - .45, .45);
+  g.save(); g.globalAlpha = inA * out;
+  const answering = ramp(t, s.ans - .5, .7);          // question card glides up when the answer starts
+  // label chip
+  const label = `${ORD[s.n]} SAVOL`;
+  g.font = `700 38px ${SANS}`; g.letterSpacing = '6px';
+  const cw = g.measureText(label).width + 70, cy = 470 - 40 * answering;
+  g.fillStyle = 'rgba(217,182,106,.16)'; g.strokeStyle = GOLD; g.lineWidth = 2;
+  g.beginPath(); g.roundRect(W / 2 - cw / 2, cy - 34, cw, 68, 34); g.fill(); g.stroke();
+  text(label, W / 2 + 3, cy + 2, `700 38px ${SANS}`, GOLD2); g.letterSpacing = '0px';
+  // big faint question mark
+  text('?', W / 2, 960 - 260 * answering, `700 ${560 - 260 * answering}px ${NUM}`, 'rgba(217,182,106,.07)');
+  // question text: word by word while it is spoken, then shrinks to the top
+  const qSize = 86 - 30 * answering, qFont = `700 ${qSize}px ${SANS}`;
+  const lines = wrap(s.q, qFont, 760);
+  const words = s.q.split(' ').length;
+  const shown = Math.ceil(clamp((t - s.a - .35) / Math.max(.6, s.q_end - s.a - .6)) * words + 1e-6);
+  const lh = qSize * 1.22, qy = (960 - 340 * answering) - (lines.length - 1) * lh / 2;
+  let wi = 0;
+  lines.forEach((ln, li) => {
+    const ws = ln.split(' ');
+    g.font = qFont; const full = g.measureText(ln).width;
+    let x = W / 2 - full / 2;
+    ws.forEach(w => {
+      wi++;
+      const ap = wi <= shown ? 1 : 0;
+      const col = answering > .5 ? GOLD2 : CREAM;
+      text(w, x, qy + li * lh, qFont, col, ap, 'left');
+      x += g.measureText(w + ' ').width;
+    });
+  });
+  if (t >= s.ans - .2) {
+    // big number
+    const p = back((t - s.ans + .1) / .6);
+    g.save(); g.translate(W / 2, 880); g.scale(p, p);
+    text(s.big, 0, 0, `700 ${s.big.length > 2 ? 170 : 220}px ${NUM}`, GOLD, clamp((t - s.ans + .1) / .25));
+    g.restore();
+    const ul = 150 * ramp(t, s.ans + .3, .5);
+    g.fillStyle = 'rgba(217,182,106,.6)'; g.fillRect(W / 2 - ul, 1005, ul * 2, 2);
+    // items
+    const n = s.items.length, font = `600 ${n > 5 ? 50 : 52}px ${SANS}`;
+    const rows = s.items.map(it => wrap(it, font, 700));
+    const lineH = n > 5 ? 62 : 66, gap = n > 5 ? 26 : 34;
+    const totalH = rows.reduce((a, r) => a + r.length * lineH, 0) + gap * (n - 1);
+    let y = 1060 + Math.max(0, (560 - totalH) / 2);
+    rows.forEach((r, i) => {
+      const p = ramp(t, s.itemT[i], .45), x = 205 - 60 * (1 - p);
+      g.save(); g.globalAlpha *= p;
+      g.fillStyle = GOLD; g.save(); g.translate(x - 50, y + lineH / 2); g.rotate(Math.PI / 4);
+      g.fillRect(-10, -10, 20, 20); g.restore();
+      r.forEach((ln, k) => text(ln, x, y + lineH / 2 + k * lineH, font, CREAM, 1, 'left'));
+      g.restore();
+      y += r.length * lineH + gap;
+    });
+  }
+  g.restore();
+}
+
+function outro(t, s) {
+  const lt = t - s.a;
+  g.save(); g.globalAlpha = ramp(t, s.a, .5) * (1 - ramp(t, TL.duration - .6, .6));
+  text("Foydali bo'lgan bo'lsa,", W / 2, 720 + 30 * (1 - ramp(lt, .1, .7)), `600 60px ${SANS}`, CREAM, ramp(lt, .1, .7));
+  text('yaqinlaringizga ulashing', W / 2, 820 + 30 * (1 - ramp(lt, .5, .7)), `700 64px ${SANS}`, GOLD2, ramp(lt, .5, .7));
+  const lw = 280 * ramp(lt, 2.4, .8);
+  g.fillStyle = GOLD; g.fillRect(W / 2 - lw, 960, lw * 2, 3);
+  g.fillStyle = GOLD2; star(W / 2, 961, 14 * ramp(lt, 2.4, .5)); g.fill();
+  const sa = s.a + (s.b - s.a) * .72;                 // "Allohu a'lam" is the last phrase
+  text('وَٱللَّهُ أَعْلَمُ', W / 2, 1130 + 20 * (1 - ramp(t, sa - .3, .8)), `150px ${AR}`, GOLD, ramp(t, sa - .3, .8));
+  text("Allohu a'lam", W / 2, 1290, `400 58px ${SANS}`, MUTED, ramp(t, sa, .8));
+  g.restore();
+}
+
+function renderAt(t) {
+  background(t);
+  let cur = SEG.find(s => t >= s.a && t < s.b) || (t < SEG[0].a ? SEG[0] : SEG[SEG.length - 1]);
+  const answered = SEG.filter(s => s.items && t >= s.a).length;
+  header(t, answered);
+  arch(.9);
+  if (cur.id === 'intro') intro(t, cur);
+  else if (cur.id === 'outro') outro(t, cur);
+  else qa(t, cur);
+}
+
+window.renderAt = renderAt;
+window.READY = document.fonts.ready.then(() => true);
+
+// live preview: plays along with the narration when opened in a browser
+if (!location.search.includes('render')) {
+  const au = new Audio('narration.wav');
+  let t0 = null;
+  cv.onclick = () => { au.currentTime = 0; au.play(); t0 = performance.now(); };
+  const qs = new URLSearchParams(location.search), fixed = qs.get('t');
+  (function loop() {
+    const t = fixed !== null ? +fixed : (t0 === null ? 0 : au.currentTime);
+    renderAt(t); requestAnimationFrame(loop);
+  })();
+}
+</script>
+</body></html>

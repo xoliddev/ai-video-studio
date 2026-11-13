@@ -1,0 +1,117 @@
+{
+  "title": "Islom haqida 5 savol",
+  "voice": "Iapetus",
+  "segments": [
+    {
+      "id": "intro",
+      "say": "Assalomu alaykum! Bugun islom haqida eng ko'p beriladigan beshta savolga qisqa va aniq javob beramiz."
+    },
+    {
+      "id": "q1",
+      "q": "Islomning nechta rukni bor?",
+      "ask": "Birinchi savol: Islomning nechta rukni bor?",
+      "answer": "Islomning ruknlari beshta. Kalimai shahodat, besh vaqt namoz, Ramazon ro'zasi, zakot va imkoni bor kishi uchun haj.",
+      "big": "5",
+      "items": [
+        "Kalimai shahodat",
+        "Besh vaqt namoz",
+        "Ramazon ro'zasi",
+        "Zakot",
+        "Haj (imkoni borga)"
+      ],
+      "keys": [
+        "kalimai",
+        "besh vaqt",
+        "ramazon",
+        "zakot",
+        "imkoni"
+      ]
+    },
+    {
+      "id": "q2",
+      "q": "Imonning ruknlari nechta?",
+      "ask": "Ikkinchi savol: Imonning ruknlari nechta?",
+      "answer": "Imonning ruknlari oltita. Allohga, farishtalariga, kitoblariga, payg'ambarlariga, oxirat kuniga hamda yaxshiyu yomon taqdir Allohdan ekaniga imon keltirish.",
+      "big": "6",
+      "items": [
+        "Allohga",
+        "Farishtalariga",
+        "Kitoblariga",
+        "Payg'ambarlariga",
+        "Oxirat kuniga",
+        "Taqdirga"
+      ],
+      "keys": [
+        "allohga",
+        "farishta",
+        "kitob",
+        "payg'ambarlari",
+        "oxirat",
+        "yaxshiyu"
+      ]
+    },
+    {
+      "id": "q3",
+      "q": "Kunda necha vaqt namoz farz?",
+      "ask": "Uchinchi savol: Kunda necha vaqt namoz farz?",
+      "answer": "Balog'atga yetgan, aqli raso har bir musulmonga kunda besh vaqt namoz farz: bomdod, peshin, asr, shom va xufton.",
+      "big": "5",
+      "items": [
+        "Bomdod",
+        "Peshin",
+        "Asr",
+        "Shom",
+        "Xufton"
+      ],
+      "keys": [
+        "bomdod",
+        "peshin",
+        "asr",
+        "shom",
+        "xufton"
+      ]
+    },
+    {
+      "id": "q4",
+      "q": "Qur'oni Karim qancha vaqtda nozil bo'lgan?",
+      "ask": "To'rtinchi savol: Qur'oni Karim qancha vaqtda nozil bo'lgan?",
+      "answer": "Qur'oni Karim Payg'ambarimiz Muhammad sollallohu alayhi vasallamga taxminan yigirma uch yil davomida bo'lib-bo'lib nozil bo'lgan. Unda bir yuz o'n to'rtta sura bor.",
+      "big": "23",
+      "items": [
+        "Payg'ambarimiz Muhammad (s.a.v.)ga",
+        "Taxminan 23 yil davomida",
+        "Bo'lib-bo'lib nozil bo'lgan",
+        "114 ta sura"
+      ],
+      "keys": [
+        "payg'ambarimiz",
+        "taxminan",
+        "bo'lib-bo'lib",
+        "bir yuz"
+      ]
+    },
+    {
+      "id": "q5",
+      "q": "Zakot kimga farz bo'ladi?",
+      "ask": "Beshinchi savol: Zakot kimga farz bo'ladi?",
+      "answer": "Asosiy ehtiyojidan ortiq, nisob miqdoridagi moli bo'lib, ustidan bir qamariy yil o'tgan, balog'atga yetgan, aqli raso musulmonga zakot farz. Miqdori molning qirqdan biri, ya'ni ikki yarim foiz.",
+      "big": "2,5%",
+      "items": [
+        "Asosiy ehtiyojdan ortiq, nisob miqdoridagi mol",
+        "Ustidan bir qamariy yil o'tgan",
+        "Balog'atga yetgan, aqli raso",
+        "Miqdori: qirqdan bir (2,5%)"
+      ],
+      "keys": [
+        "asosiy",
+        "ustidan",
+        "balog'atga",
+        "miqdori"
+      ]
+    },
+    {
+      "id": "outro",
+      "say": "Foydali bo'lgan bo'lsa, yaqinlaringizga ham ulashing. Alloh barchamizning ilmimizni ziyoda qilsin. Allohu a'lam."
+    }
+  ]
+}

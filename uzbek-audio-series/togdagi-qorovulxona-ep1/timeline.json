@@ -1,0 +1,154 @@
+{
+  "title": "Tog'dagi Qorovulxona: Qor Bo'roni — 1-Qism",
+  "subtitle": "Bo'ron va Begona",
+  "duration": 156.259,
+  "fps": 24,
+  "width": 1080,
+  "height": 1920,
+  "lines": [
+    {
+      "id": "q01",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Tog'da qish boshqacha bo'ladi. Bo'ron uvillashi xuddi qadimgi sharpalarning faryodiga o'xshaydi. Bu balandlikda odam yo yolg'izlikka o'rganadi... yoki aqldan ozadi.",
+      "a": 4.5,
+      "b": 20.427,
+      "dur": 15.927
+    },
+    {
+      "id": "q02",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Bu qahratonda qanday qilib tirik qolish mumkin?! Kim u?!",
+      "a": 23.927,
+      "b": 27.815,
+      "dur": 3.887
+    },
+    {
+      "id": "q03",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Yordam bering... Iltimos, oching! Mashinam jarga quladi... Ular... ular ortimdan kelyapti!",
+      "a": 29.615,
+      "b": 35.622,
+      "dur": 6.007
+    },
+    {
+      "id": "q04",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Kir, tezroq! Kir ichkariga. Eshikni zanjirla. Olovga yaqinroq o'tir, mana issiq choy.",
+      "a": 38.022,
+      "b": 46.19,
+      "dur": 8.167
+    },
+    {
+      "id": "q05",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Rahmat... Qo'llarimni sezmayapman. Lekin siz eshikni mustahkamroq qulflang. Ular bu yerga yetib kelishdi.",
+      "a": 47.39,
+      "b": 55.157,
+      "dur": 7.767
+    },
+    {
+      "id": "q06",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "O'zingni bos, yigit. Bu dovonda bo'rilardan boshqa hech qanday tirik jon yo'q. Kim seni ta'qib qiladi?",
+      "a": 56.957,
+      "b": 63.405,
+      "dur": 6.447
+    },
+    {
+      "id": "q07",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Ular bo'rilar emas! Ular odamlar. Uch kishi. Qora kiyingan, qo'llarida qurol bor. Ular butun qor bo'ylab izimdan kelishyapti.",
+      "a": 64.605,
+      "b": 74.092,
+      "dur": 9.487
+    },
+    {
+      "id": "q08",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Nega? Oddiy yo'lovchining orqasidan uchta qurolli odam tushmaydi. Kimning yo'lini kesding?",
+      "a": 75.692,
+      "b": 82.059,
+      "dur": 6.367
+    },
+    {
+      "id": "q09",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Men ularning qora daftarchasini ko'rib qoldim. O'n ikki yil oldin tog'da g'oyib bo'lgan o'sha samolyot haqidagi haqiqatni.",
+      "a": 83.259,
+      "b": 90.867,
+      "dur": 7.607
+    },
+    {
+      "id": "q10",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Nima deding?! Qaysi samolyot?!",
+      "a": 92.867,
+      "b": 95.474,
+      "dur": 2.607
+    },
+    {
+      "id": "q11",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Shimoliy reys. Yuz qirqta yo'lovchisi bilan g'oyib bo'lgan o'sha mashhur samolyot... Siz bilmaysiz, u texnik nosozlik emasdi. U ataylab portlatilgan!",
+      "a": 96.674,
+      "b": 107.042,
+      "dur": 10.367
+    },
+    {
+      "id": "q12",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Men bilmaymanmi?.. O'sha samolyotning birinchi uchuvchisi... mening yagona o'g'lim edi.",
+      "a": 109.842,
+      "b": 117.129,
+      "dur": 7.287
+    },
+    {
+      "id": "q13",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Nima?! Siz... siz o'sha polkovnik Samadovmisiz?!",
+      "a": 118.929,
+      "b": 124.056,
+      "dur": 5.127
+    },
+    {
+      "id": "q14",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Ha. Men o'n ikki yildan beri mana shu kulbada o'tirib, o'g'limning qotillari qachon bu tog'dan o'tishini kutardim.",
+      "a": 125.256,
+      "b": 133.304,
+      "dur": 8.047
+    },
+    {
+      "id": "q15",
+      "char": "begona",
+      "voice": "Puck",
+      "text": "Eshityapsizmi?.. Qor g'irchillayapti. Ular eshik orqasida!",
+      "a": 135.804,
+      "b": 140.251,
+      "dur": 4.447
+    },
+    {
+      "id": "q16",
+      "char": "qorovul",
+      "voice": "Charon",
+      "text": "Eshikdan uzoqroq tur, bolam. Haqiqat o'zi eshigimizni taqillatib keldi. Miltiqqa tegmang, o'zim kutib olaman!",
+      "a": 141.651,
+      "b": 149.059,
+      "dur": 7.407
+    }
+  ]
+}
